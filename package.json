@@ -1,0 +1,25 @@
+{
+  "name": "solemate",
+  "private": true,
+  "version": "2.0.0",
+  "description": "SoleMate: custom shoes from a 3D foot scan (monorepo root)",
+  "scripts": {
+    "dev": "concurrently --kill-others -n api,web -c blue,magenta \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd backend && (test -d .venv && . .venv/bin/activate || true) && uvicorn app.main:app --reload --port 8000",
+    "dev:web": "npm --prefix frontend run dev",
+    "setup": "npm run setup:api && npm run setup:web",
+    "setup:api": "cd backend && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt",
+    "setup:web": "npm --prefix frontend install",
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "cd backend && (test -d .venv && . .venv/bin/activate || true) && python -m pytest",
+    "test:web": "npm --prefix frontend run test",
+    "build": "npm --prefix frontend run build",
+    "typecheck": "npm --prefix frontend run typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

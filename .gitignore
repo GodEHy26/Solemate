@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+backend/.venv/
+backend/venv/
+backend/data_store/
+backend/.env
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# Scans / generated meshes (kept out of git; large binary data)
+*.glb
+*.obj
+*.ply
+*.stl
+!docs/**/*.glb
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.log
+
+# TypeScript incremental build info
+*.tsbuildinfo
