@@ -1,0 +1,150 @@
+{
+  "currency": "USD",
+  "components": [
+    {
+      "id": "outsole",
+      "name": "Outsole",
+      "description": "The ground-contact layer. Trades grip and durability against weight and flexibility.",
+      "required": true,
+      "options": [
+        {"id": "rubber", "name": "Solid rubber", "material": "Carbon-filled natural/synthetic rubber", "price_delta_cents": 0,
+         "properties": {"grip": 5, "durability": 4, "weight": 4, "flexibility": 3, "water_resistance": 5},
+         "colors": ["#111111", "#f2efe8", "#8b5a2b", "#1f3a5f"],
+         "notes": "Best all-round traction; the default for court and trail use."},
+        {"id": "blown_rubber", "name": "Blown rubber", "material": "Air-injected rubber compound", "price_delta_cents": 0,
+         "properties": {"grip": 4, "durability": 3, "weight": 2, "flexibility": 4, "water_resistance": 4},
+         "colors": ["#111111", "#f2efe8", "#c9c9c9"],
+         "notes": "Lighter and softer than solid rubber; wears faster."},
+        {"id": "gum_rubber", "name": "Gum rubber", "material": "Translucent natural rubber", "price_delta_cents": 1000,
+         "properties": {"grip": 5, "durability": 3, "weight": 4, "flexibility": 4, "water_resistance": 4},
+         "colors": ["#d8a75b"],
+         "notes": "Classic look with excellent indoor grip."},
+        {"id": "polyurethane", "name": "Polyurethane (PU)", "material": "Microcellular polyurethane", "price_delta_cents": 1500,
+         "properties": {"grip": 3, "durability": 5, "weight": 3, "flexibility": 3, "water_resistance": 5},
+         "colors": ["#111111", "#f2efe8", "#3b3b3b"],
+         "notes": "Very abrasion resistant and oil resistant; a work and everyday choice."},
+        {"id": "tpu", "name": "TPU", "material": "Thermoplastic polyurethane", "price_delta_cents": 2000,
+         "properties": {"grip": 3, "durability": 5, "weight": 3, "flexibility": 2, "water_resistance": 5},
+         "colors": ["#111111", "#f2efe8", "#2e86de", "#ff6b35"],
+         "notes": "Stiff, precise and very durable; suits performance platforms."}
+      ]
+    },
+    {
+      "id": "midsole",
+      "name": "Midsole",
+      "description": "Cushioning between you and the outsole.",
+      "required": true,
+      "options": [
+        {"id": "eva", "name": "EVA foam", "material": "Compression-moulded ethylene-vinyl acetate", "price_delta_cents": 0,
+         "properties": {"cushioning": 3, "responsiveness": 3, "durability": 3, "weight": 2},
+         "colors": ["#f2efe8", "#111111", "#dfe6e9"],
+         "notes": "Light and affordable; compresses over time."},
+        {"id": "pu", "name": "PU foam", "material": "Polyurethane foam", "price_delta_cents": 1500,
+         "properties": {"cushioning": 4, "responsiveness": 2, "durability": 5, "weight": 4},
+         "colors": ["#f2efe8", "#111111"],
+         "notes": "Dense, long-lasting support."},
+        {"id": "etpu", "name": "Expanded TPU beads", "material": "Fused e-TPU pellets", "price_delta_cents": 2500,
+         "properties": {"cushioning": 5, "responsiveness": 4, "durability": 4, "weight": 3},
+         "colors": ["#f2efe8", "#111111"],
+         "notes": "High energy return, temperature stable."},
+        {"id": "supercritical", "name": "Supercritical foam", "material": "Nitrogen-infused PEBA/TPU", "price_delta_cents": 3500,
+         "properties": {"cushioning": 5, "responsiveness": 5, "durability": 3, "weight": 1},
+         "colors": ["#f2efe8", "#fff3b0", "#111111"],
+         "notes": "Lightest and bounciest option; race-day style feel."},
+        {"id": "cork_latex", "name": "Cork latex", "material": "Cork granules bound in natural latex", "price_delta_cents": 1000,
+         "properties": {"cushioning": 3, "responsiveness": 2, "durability": 4, "weight": 3},
+         "colors": ["#c8a27a"],
+         "notes": "Moulds to the foot over time; a casual and sustainable choice."}
+      ]
+    },
+    {
+      "id": "upper",
+      "name": "Upper",
+      "description": "The material that wraps the foot. Scan-driven patterns are cut per customer.",
+      "required": true,
+      "options": [
+        {"id": "engineered_knit", "name": "Engineered knit", "material": "Zoned polyester knit (flyknit-style)", "price_delta_cents": 2500,
+         "properties": {"breathability": 5, "support": 3, "weight": 1, "water_resistance": 1, "durability": 3},
+         "colors": ["#111111", "#f2efe8", "#2e86de", "#e63946", "#2a9d8f", "#f4a261"],
+         "notes": "Sock-like fit; knit density is tuned to the scanned foot."},
+        {"id": "canvas", "name": "Canvas (cloth)", "material": "12 oz cotton canvas", "price_delta_cents": 0,
+         "properties": {"breathability": 4, "support": 2, "weight": 2, "water_resistance": 1, "durability": 3},
+         "colors": ["#f2efe8", "#111111", "#1f3a5f", "#6b705c", "#b5838d"],
+         "notes": "Classic, breathable and easy to clean."},
+        {"id": "mesh", "name": "Engineered mesh", "material": "Open-weave polyester mesh with TPU overlays", "price_delta_cents": 1000,
+         "properties": {"breathability": 5, "support": 3, "weight": 1, "water_resistance": 1, "durability": 3},
+         "colors": ["#111111", "#f2efe8", "#ff6b35", "#8338ec"],
+         "notes": "Running-style ventilation."},
+        {"id": "full_grain_leather", "name": "Full-grain leather", "material": "Vegetable-tanned full-grain leather", "price_delta_cents": 4000,
+         "properties": {"breathability": 2, "support": 5, "weight": 4, "water_resistance": 4, "durability": 5},
+         "colors": ["#111111", "#f2efe8", "#5c3a21", "#8b0000"],
+         "notes": "Premium, structured and ages well."},
+        {"id": "suede", "name": "Suede", "material": "Split-grain suede", "price_delta_cents": 3000,
+         "properties": {"breathability": 3, "support": 4, "weight": 3, "water_resistance": 2, "durability": 4},
+         "colors": ["#111111", "#9a8c98", "#bc6c25", "#3d405b"],
+         "notes": "Soft hand feel; skate and lifestyle favourite."},
+        {"id": "recycled_textile", "name": "Recycled textile", "material": "Woven fabric from recycled PET", "price_delta_cents": 500,
+         "properties": {"breathability": 4, "support": 3, "weight": 2, "water_resistance": 2, "durability": 3},
+         "colors": ["#f2efe8", "#111111", "#4a7c59"],
+         "notes": "Lower-impact everyday option."}
+      ]
+    },
+    {
+      "id": "lining",
+      "name": "Lining",
+      "description": "The layer against your sock.",
+      "required": true,
+      "options": [
+        {"id": "textile", "name": "Textile lining", "material": "Brushed polyester", "price_delta_cents": 0,
+         "properties": {"breathability": 4, "comfort": 3, "durability": 3}, "colors": ["#111111", "#f2efe8"]},
+        {"id": "moisture_wicking", "name": "Moisture-wicking lining", "material": "Technical knit with wicking finish", "price_delta_cents": 800,
+         "properties": {"breathability": 5, "comfort": 4, "durability": 3}, "colors": ["#111111", "#f2efe8"]},
+        {"id": "leather", "name": "Leather lining", "material": "Pigskin / calf lining", "price_delta_cents": 1500,
+         "properties": {"breathability": 3, "comfort": 5, "durability": 5}, "colors": ["#d9b99b", "#111111"]}
+      ]
+    },
+    {
+      "id": "insole",
+      "name": "Insole",
+      "description": "The footbed. The printed option is generated from your 3D scan.",
+      "required": true,
+      "options": [
+        {"id": "foam", "name": "Standard foam", "material": "Die-cut PU foam", "price_delta_cents": 0,
+         "properties": {"cushioning": 3, "support": 2, "durability": 3}, "colors": ["#111111"]},
+        {"id": "open_cell_foam", "name": "Open-cell foam", "material": "Open-cell PU with antimicrobial finish", "price_delta_cents": 800,
+         "properties": {"cushioning": 4, "support": 2, "durability": 4}, "colors": ["#111111", "#2a9d8f"]},
+        {"id": "cork", "name": "Cork footbed", "material": "Moulded cork with leather top", "price_delta_cents": 1200,
+         "properties": {"cushioning": 3, "support": 4, "durability": 5}, "colors": ["#c8a27a"]},
+        {"id": "custom_printed", "name": "Custom 3D-printed lattice", "material": "TPU lattice printed from the foot scan", "price_delta_cents": 4500,
+         "properties": {"cushioning": 5, "support": 5, "durability": 4}, "colors": ["#111111", "#f2efe8", "#2e86de"],
+         "requires_scan": true,
+         "notes": "Arch and heel-cup geometry come straight from the scanned contour."}
+      ]
+    },
+    {
+      "id": "laces",
+      "name": "Laces",
+      "description": "Closure.",
+      "required": true,
+      "options": [
+        {"id": "flat_cotton", "name": "Flat cotton", "material": "Woven cotton", "price_delta_cents": 0, "properties": {}, "colors": ["#111111", "#f2efe8", "#e63946"]},
+        {"id": "round_poly", "name": "Round polyester", "material": "Braided polyester", "price_delta_cents": 0, "properties": {}, "colors": ["#111111", "#f2efe8", "#2e86de"]},
+        {"id": "elastic_no_tie", "name": "Elastic no-tie", "material": "Elastic cord with lock", "price_delta_cents": 600, "properties": {}, "colors": ["#111111", "#f2efe8"]}
+      ]
+    }
+  ],
+  "compatibility_rules": [
+    {
+      "id": "knit-needs-flexible-platform",
+      "when": {"upper": "engineered_knit"},
+      "disallow": {"midsole": ["cork_latex"], "outsole": ["tpu"]},
+      "reason": "Engineered knit uppers are built on flexible platforms; cork latex and TPU plates are too stiff for the pattern."
+    },
+    {
+      "id": "cork-latex-casual-only",
+      "when": {"midsole": "cork_latex"},
+      "disallow": {"outsole": ["blown_rubber"]},
+      "reason": "Cork latex midsoles are bonded to solid outsoles only."
+    }
+  ]
+}
