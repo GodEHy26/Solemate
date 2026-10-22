@@ -174,3 +174,65 @@ table.measure td:last-child { text-align: right; font-variant-numeric: tabular-n
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 .pulse { animation: pulse 1.2s ease-in-out infinite; }
+
+/* ===================== Mobile / PWA ===================== */
+html { -webkit-tap-highlight-color: transparent; }
+body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+.topbar { padding-top: calc(12px + env(safe-area-inset-top)); }
+.tabbar { display: none; }
+.install-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-s); }
+
+@media (max-width: 720px) {
+  .container { padding: 16px 14px calc(96px + env(safe-area-inset-bottom)); }
+  .footer { display: none; }
+  .nav { display: none; }
+  .topbar { justify-content: center; }
+  h1 { font-size: 1.6rem; }
+  .hero { padding: 20px 0 8px; }
+
+  /* bottom tab bar */
+  .tabbar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(15, 17, 23, 0.94); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+  }
+  .tabbar a {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 4px; border-radius: 12px; color: var(--text-3); font-size: 0.7rem; font-weight: 600; position: relative;
+  }
+  .tabbar a:hover { text-decoration: none; }
+  .tabbar a svg { width: 22px; height: 22px; }
+  .tabbar a.active { color: var(--accent); background: rgba(40, 171, 255, 0.1); }
+  .tabbar .badge { position: absolute; top: 2px; right: calc(50% - 20px); background: var(--accent); color: #06111c; border-radius: 999px; font-size: 0.62rem; padding: 0 5px; min-width: 16px; text-align: center; }
+
+  /* comfortable touch targets; 16px inputs stop iOS Safari zooming on focus */
+  .btn { min-height: 48px; }
+  .segmented button { min-height: 40px; padding: 8px 18px; }
+  input[type="text"], input[type="email"], input[type="number"], select, textarea { font-size: 16px; min-height: 46px; }
+  .option { padding: 14px; }
+  .option-grid { grid-template-columns: 1fr 1fr; }
+  .swatch-dot { width: 36px; height: 36px; }
+  .grid { grid-template-columns: 1fr; }
+  .grid.two { grid-template-columns: 1fr; }
+  .sticky { position: static; }
+  .viewer { height: 300px; }
+  .size-grid { grid-template-columns: repeat(3, 1fr); }
+  .btn.lg { padding: 16px 20px; }
+  .row.between > .stack { align-items: flex-start !important; }
+
+  /* scan: camera fills the width */
+  .scan-stage { width: min(100%, 440px); }
+  .card { padding: 14px; }
+
+  /* configurator: keep the price + add-to-cart reachable above the tab bar */
+  .price-bar {
+    position: fixed; left: 0; right: 0; bottom: calc(62px + env(safe-area-inset-bottom)); z-index: 25;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 14px; background: rgba(26, 29, 39, 0.97); border-top: 1px solid var(--border);
+  }
+}
+@media (min-width: 721px) { .price-bar { display: none; } }
+@media (max-width: 380px) { .option-grid { grid-template-columns: 1fr; } }
+@media (display-mode: standalone) { .footer { display: none; } }

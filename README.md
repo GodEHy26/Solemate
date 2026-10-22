@@ -45,8 +45,12 @@ npm run dev
 Or from the repo root: `npm install && npm run setup && npm run dev`, or `./scripts/dev.sh`,
 or `docker compose up --build` (web on http://localhost:8080).
 
-Open the app on a phone (same Wi-Fi, use the LAN address the dev server prints; camera and
-motion sensors need HTTPS on iOS, so tunnel or serve over TLS for real device testing).
+### On a phone
+
+The app is a mobile-first PWA: bottom tab bar, sticky price bar, installable to the home screen.
+Phones require HTTPS for the camera and motion sensors, so use `npm run dev:phone` (self-signed
+certificate on your Wi-Fi) or a tunnel such as `cloudflared tunnel --url http://localhost:5173`.
+Publishing with a real domain is covered in `docs/DEPLOYMENT.md`.
 
 ## Tests
 
@@ -79,7 +83,7 @@ frontend/
     components/     scan/ viewer/ configurator/ layout/
     pages/          Home, Scan, Profile, Catalog, Configurator, Checkout, Order
     store/          cart, foot profiles
-docs/               ARCHITECTURE, SCAN_PIPELINE, CUSTOMIZATION, ROADMAP
+docs/               ARCHITECTURE, SCAN_PIPELINE, CUSTOMIZATION, DEPLOYMENT, ROADMAP
 ```
 
 ## API overview

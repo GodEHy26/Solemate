@@ -45,6 +45,16 @@ export function ScanWizard() {
   const pending = useRef<Promise<unknown>[]>([]);
 
   const cameraActive = step === 'topdown' || step === 'orbit';
+  const insecure = typeof window !== 'undefined' && !window.isSecureContext;
+
+  // Keep the screen awake while the camera is in use.
+  useEffect(() => {
+    if (!(step === 'topdown' || step === 'orbit')) return;
+    type WakeNav = Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } };
+    let lock: { release: () => Promise<void> } | null = null;
+    (navigator as WakeNav).wakeLock?.request('screen').then((l) => { lock = l; }).catch(() => undefined);
+    return () => { void lock?.release(); };
+  }, [step]);
   const camera = useCamera(cameraActive);
   const orientation = useDeviceOrientation(step === 'orbit');
 
@@ -197,6 +207,12 @@ export function ScanWizard() {
         <span className="pill">{step}</span>
       </div>
       {error && <div className="alert error">{error}</div>}
+      {insecure && (
+        <div className="alert warning">
+          This page is not on HTTPS, so your phone will block the camera and motion sensors. Open the site over
+          https:// (see docs/DEPLOYMENT.md for a quick tunnel).
+        </div>
+      )}
 
       {step === 'intro' && (
         <div className="card stack">

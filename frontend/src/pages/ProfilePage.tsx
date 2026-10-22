@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api } from '../lib/api';
+import { api, apiUrl } from '../lib/api';
 import type { FootProfile, ShoeSummary } from '../lib/types';
 import { FootprintChart, SectionChart } from '../components/viewer/FootprintChart';
 import { FootMeshViewer } from '../components/viewer/FootMeshViewer';
@@ -64,10 +64,10 @@ export function ProfilePage() {
 
       <div className="grid two">
         <div className="stack">
-          <FootMeshViewer url={profile.mesh_urls.glb} />
+          <FootMeshViewer url={apiUrl(profile.mesh_urls.glb)} />
           <div className="row">
-            <a className="btn ghost" href={profile.mesh_urls.glb} download>Download GLB</a>
-            <a className="btn ghost" href={profile.mesh_urls.obj} download>Download OBJ</a>
+            <a className="btn ghost" href={apiUrl(profile.mesh_urls.glb)} download>Download GLB</a>
+            <a className="btn ghost" href={apiUrl(profile.mesh_urls.obj)} download>Download OBJ</a>
           </div>
           <div className="card">
             <h3 className="mb">Footprint contour</h3>

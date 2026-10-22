@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { api } from '../lib/api';
+import { api, formatPrice } from '../lib/api';
 import { defaultColors, priceLocally } from '../lib/pricing';
 import type { PriceResult, ShoeDetail } from '../lib/types';
 import { ComponentPicker } from '../components/configurator/ComponentPicker';
@@ -105,6 +105,13 @@ export function ConfiguratorPage() {
             onAdd={add}
           />
         </div>
+      </div>
+      <div className="price-bar">
+        <div>
+          <div className="small muted">Total</div>
+          <strong>{price ? formatPrice(price.total_cents, currency) : '…'}</strong>
+        </div>
+        <button className="btn primary" disabled={!price?.valid || pending || (price.requires_scan && !feetReady)} onClick={add}>Add to cart</button>
       </div>
     </div>
   );
