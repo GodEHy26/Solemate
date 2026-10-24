@@ -184,7 +184,7 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
 
 @media (max-width: 720px) {
   .container { padding: 16px 14px calc(96px + env(safe-area-inset-bottom)); }
-  .footer { display: none; }
+  .footer { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   .nav { display: none; }
   .topbar { justify-content: center; }
   h1 { font-size: 1.6rem; }
@@ -235,4 +235,13 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
 }
 @media (min-width: 721px) { .price-bar { display: none; } }
 @media (max-width: 380px) { .option-grid { grid-template-columns: 1fr; } }
-@media (display-mode: standalone) { .footer { display: none; } }
+
+/* Preorder banner, legal pages, consent */
+.preorder-banner { display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap; padding: 8px 14px; background: rgba(255, 181, 71, 0.12); border-bottom: 1px solid rgba(255, 181, 71, 0.35); font-size: 0.85rem; color: #ffd79a; text-align: center; }
+.preorder-banner strong { letter-spacing: 0.08em; color: var(--warning); }
+.footer { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.footer-links { display: flex; gap: 16px; }
+.legal section.card p, .legal li { font-size: 0.95rem; color: var(--text-2); }
+.legal ul { margin-left: 18px; display: grid; gap: 8px; }
+.consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 0.9rem; color: var(--text-2); cursor: pointer; }
+.consent input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); }

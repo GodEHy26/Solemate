@@ -5,6 +5,8 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
 import { HomePage } from './pages/HomePage';
 import { OrderPage } from './pages/OrderPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { TermsPage } from './pages/TermsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ScanPage } from './pages/ScanPage';
 
@@ -19,6 +21,8 @@ export default function App() {
         <Route path="/shoes/:slug" element={<ConfiguratorPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/orders/:id" element={<OrderPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="*" element={<div className="container"><h2>Page not found</h2></div>} />
       </Routes>
     </Shell>

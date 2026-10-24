@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api, ApiError, waitForScan } from '../../lib/api';
 import { useCamera } from '../../lib/hooks/useCamera';
 import { useDeviceOrientation } from '../../lib/hooks/useOrientation';
@@ -239,6 +239,10 @@ export function ScanWizard() {
             Stand barefoot on a plain floor with the sheet of paper under your foot. Good, even light and a floor
             that contrasts with your skin give the cleanest result. Keep your lower leg still during the sweep.
           </div>
+          <p className="small muted">
+            Your photos are used only to build your 3D model and are deleted from our server as soon as it is built.
+            You can delete the model any time. See the <Link to="/privacy">Privacy Policy</Link>.
+          </p>
           <button className="btn primary lg" onClick={begin} disabled={!plan}>Start scan</button>
           <details>
             <summary className="muted small">Have a mesh from a LiDAR / TrueDepth app? Upload it instead.</summary>

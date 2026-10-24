@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom';
 import { formatPrice } from '../../lib/api';
+import { useSiteConfig } from '../../lib/hooks/useSiteConfig';
 import type { PriceResult } from '../../lib/types';
 
 interface Props {
@@ -9,11 +11,15 @@ interface Props {
 }
 
 export function PriceSummary({ price, pending, feetReady, onAdd }: Props) {
+  const cfg = useSiteConfig();
   if (!price) return <div className="card"><div className="spinner" /></div>;
-  const blocked = !price.valid || (price.requires_scan && !feetReady);
+  const blocked = !price.valid;
   return (
     <div className="card stack sticky">
-      <h3>Your build</h3>
+      <div className="row between">
+        <h3>Your preorder</h3>
+        <span className="pill warning">Preorder</span>
+      </div>
       <div className="price-lines">
         <div><span>Base</span><span>{formatPrice(price.base_cents, price.currency)}</span></div>
         {price.lines.filter((l) => l.cents !== 0).map((l) => (
@@ -22,11 +28,11 @@ export function PriceSummary({ price, pending, feetReady, onAdd }: Props) {
         <div className="total"><span>Total</span><span>{pending ? '…' : formatPrice(price.total_cents, price.currency)}</span></div>
       </div>
       {price.errors.map((e) => <div key={e} className="alert error">{e}</div>)}
-      {price.requires_scan && !feetReady && (
-        <div className="alert warning">This build uses your 3D scan. <a href="/scan">Scan both feet</a> before adding it to the cart.</div>
+      {!feetReady && (
+        <div className="alert warning">Shoes are made from your scan. <Link to="/scan">Scan both feet</Link> before you check out.</div>
       )}
-      <button className="btn primary block lg" disabled={blocked || pending} onClick={onAdd}>Add to cart</button>
-      <p className="small muted">Prices are confirmed by the server when you order. Shipping and tax are added at payment.</p>
+      <button className="btn primary block lg" disabled={blocked || pending} onClick={onAdd}>Add preorder to cart</button>
+      <p className="small muted">{cfg?.ship_estimate} Paid in full at checkout. See the <Link to="/terms">Preorder Terms</Link>.</p>
     </div>
   );
 }

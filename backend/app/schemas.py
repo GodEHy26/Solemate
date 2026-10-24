@@ -96,6 +96,7 @@ class OrderCreate(BaseModel):
     shipping: ShippingAddress
     items: list[OrderItemIn] = Field(min_length=1)
     notes: str | None = Field(default=None, max_length=2000)
+    accepted_terms: bool = Field(description="Customer ticked the preorder terms and privacy policy box")
 
 
 class OrderOut(BaseModel):
@@ -110,3 +111,7 @@ class OrderOut(BaseModel):
     total_cents: int
     notes: str | None
     created_at: datetime
+    preorder: bool = True
+    amount_paid_cents: int = 0
+    paid_at: datetime | None = None
+    ship_estimate: str = ""

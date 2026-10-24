@@ -60,7 +60,8 @@ class Order(SQLModel, table=True):
 
     id: str = Field(default_factory=_uuid, primary_key=True)
     created_at: datetime = Field(default_factory=_now)
-    status: str = Field(default="pending_payment")
+    # awaiting_payment -> preordered (paid) ; payment_failed | needs_review | cancelled
+    status: str = Field(default="awaiting_payment", index=True)
     customer_name: str
     email: str
     shipping_json: str = "{}"
@@ -69,3 +70,10 @@ class Order(SQLModel, table=True):
     subtotal_cents: int = 0
     total_cents: int = 0
     notes: str | None = None
+    preorder: bool = True
+    terms_version: str | None = None
+    terms_accepted_at: datetime | None = None
+    checkout_session_id: str | None = Field(default=None, index=True)
+    payment_intent_id: str | None = None
+    amount_paid_cents: int = 0
+    paid_at: datetime | None = None

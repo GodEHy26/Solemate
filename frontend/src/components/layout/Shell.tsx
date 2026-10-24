@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../../store/useCart';
 import { useFeet } from '../../store/useFeet';
 import { InstallPrompt } from './InstallPrompt';
+import { PreorderBanner } from './PreorderBanner';
 
 const icon = {
   home: <path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11z" />,
@@ -32,17 +33,21 @@ export function Shell({ children }: { children: ReactNode }) {
         <nav className="nav">
           <NavLink to="/scan">Scan {scanned > 0 && <span className="pill accent">{scanned}/2</span>}</NavLink>
           <NavLink to="/shoes">Shoes</NavLink>
-          <NavLink to="/checkout">Cart {count > 0 && <span className="pill accent">{count}</span>}</NavLink>
+          <NavLink to="/checkout">Preorders {count > 0 && <span className="pill accent">{count}</span>}</NavLink>
         </nav>
       </header>
+      <PreorderBanner />
       <InstallPrompt />
       <main style={{ flex: 1 }}>{children}</main>
-      <footer className="footer">SoleMate · custom footwear from a 3D foot scan · successor to the IB Computer Science IA</footer>
+      <footer className="footer">
+        <span>SoleMate · every pair is a made-to-order preorder</span>
+        <span className="footer-links"><Link to="/terms">Preorder Terms</Link><Link to="/privacy">Privacy Policy</Link></span>
+      </footer>
       <nav className="tabbar" aria-label="Main">
         <NavLink to="/" end><Icon d="home" />Home</NavLink>
         <NavLink to="/scan"><Icon d="scan" />Scan{scanned > 0 && <span className="badge">{scanned}/2</span>}</NavLink>
         <NavLink to="/shoes"><Icon d="shoe" />Shoes</NavLink>
-        <NavLink to="/checkout"><Icon d="cart" />Cart{count > 0 && <span className="badge">{count}</span>}</NavLink>
+        <NavLink to="/checkout"><Icon d="cart" />Preorders{count > 0 && <span className="badge">{count}</span>}</NavLink>
       </nav>
     </div>
   );

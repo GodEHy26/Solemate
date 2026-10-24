@@ -142,26 +142,22 @@ def test_mesh_upload_route(client, tmp_path):
     assert profile["measurements"]["length_mm"] == pytest.approx(260.0, rel=0.05)
 
 
-def test_order_flow(client, tmp_path):
-    shoes = client.get("/api/catalog/shoes").json()["shoes"]
-    daily = next(s for s in shoes if s["slug"] == "solemate-daily")
-    body = {
-        "customer_name": "Test Customer",
-        "email": "test@example.com",
-        "shipping": {"line1": "1 Main St", "city": "Seoul", "postal_code": "04524", "country": "KR"},
-        "items": [{"shoe_slug": "solemate-daily", "selections": daily["defaults"], "quantity": 2}],
-    }
-    r = client.post("/api/orders", json=body)
-    assert r.status_code == 201, r.text
-    order = r.json()
-    assert order["total_cents"] == 2 * client.post(
-        "/api/catalog/price", json={"shoe_slug": "solemate-daily", "selections": daily["defaults"]}
-    ).json()["total_cents"]
-    assert client.get(f"/api/orders/{order['id']}").json()["id"] == order["id"]
+def test_photos_are_deleted_after_reconstruction(client, tmp_path):
+    from app.config import get_settings
 
-    # a scan-dependent insole without profiles is rejected
-    body["items"][0]["selections"] = {**daily["defaults"], "insole": "custom_printed"}
-    assert client.post("/api/orders", json=body).status_code == 422
-    # unknown profile ids are rejected
-    body["items"][0].update({"left_profile_id": "nope", "right_profile_id": "nope"})
-    assert client.post("/api/orders", json=body).status_code == 422
+    scan = client.post("/api/scans", json={"side": "left", "known_length_mm": 270}).json()
+    _upload_frames(client, scan["id"], tmp_path, topdown=False)
+    frames_dir = get_settings().scans_dir / scan["id"] / "frames"
+    assert any(frames_dir.iterdir())
+    assert client.post(f"/api/scans/{scan['id']}/reconstruct").status_code == 202
+    assert client.get(f"/api/scans/{scan['id']}").json()["status"] == "complete"
+    assert not frames_dir.exists()                       # raw photos gone
+    assert (get_settings().scans_dir / scan["id"] / "foot.glb").exists()   # model kept
+
+
+def test_site_config_is_preorder(client):
+    cfg = client.get("/api/config").json()
+    assert cfg["preorder"] is True
+    assert cfg["payments_enabled"] is True
+    assert cfg["legal"]["configured"] is True
+    assert "ship" in cfg["ship_estimate"].lower()

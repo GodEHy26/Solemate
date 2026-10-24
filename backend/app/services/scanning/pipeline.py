@@ -58,6 +58,24 @@ def save_mesh_upload(session_id: str, filename: str, data: bytes) -> Path:
     return path
 
 
+def discard_raw_inputs(session_id: str) -> None:
+    """Privacy: once the 3D model exists the photos are no longer needed, so remove them."""
+    d = get_settings().scans_dir / session_id
+    shutil.rmtree(d / "frames", ignore_errors=True)
+    for f in d.glob("upload.*"):
+        f.unlink(missing_ok=True)
+
+
+def delete_profile_data(db: Session, profile: FootProfile) -> None:
+    """Remove a foot profile, its meshes and the scan session it came from."""
+    session = db.get(ScanSession, profile.scan_session_id)
+    delete_session_files(profile.scan_session_id)
+    db.delete(profile)
+    if session is not None:
+        db.delete(session)
+    db.commit()
+
+
 def frames_from_session(session: ScanSession) -> list[FrameInput]:
     return [
         FrameInput(path=Path(f["path"]), kind=f["kind"], yaw_deg=f["yaw_deg"], pitch_deg=f["pitch_deg"], index=f["index"])
@@ -124,6 +142,9 @@ def process_session(session_id: str) -> None:
                 paper=session.paper_size,
             )
             _persist_result(db, session, result)
+            db.commit()
+            discard_raw_inputs(session.id)
+            return
         except (ReconstructionError, ValueError) as exc:
             session.status = "failed"
             session.error = str(exc)
@@ -140,6 +161,9 @@ def process_uploaded_mesh(session_id: str, mesh_path: Path, units: str) -> None:
         try:
             result = UploadedMeshReconstructor().reconstruct(mesh_path, units)
             _persist_result(db, session, result)
+            db.commit()
+            discard_raw_inputs(session.id)
+            return
         except (ReconstructionError, ValueError) as exc:
             session.status = "failed"
             session.error = str(exc)

@@ -30,6 +30,33 @@ class Settings(BaseSettings):
     # Run reconstruction inline in the request instead of a background task.
     sync_processing: bool = False
 
+    # Preorders ---------------------------------------------------------------
+    # Every product is a preorder: nothing is manufactured until it is ordered.
+    preorder_ship_estimate: str = (
+        "Estimated shipping: to be announced. We will email you before production starts."
+    )
+    terms_version: str = "2026-10-24"
+    shipping_policy: str = (
+        "Shipping and any taxes or duties are not included in the price shown. "
+        "We will contact you about them before production starts."
+    )
+
+    # Payments (Stripe Checkout, hosted by Stripe) ------------------------------
+    public_url: str = "http://localhost:5173"   # where the web app lives; used for Stripe return URLs
+    stripe_secret_key: str = ""                 # sk_test_... or sk_live_...
+    stripe_webhook_secret: str = ""             # whsec_...
+    stripe_api_base: str = ""                   # tests only: point the SDK at a local fake
+
+    # Operator details shown on the legal pages -------------------------------
+    company_name: str = ""
+    support_email: str = ""
+    company_address: str = ""
+    governing_law: str = ""                     # e.g. "the laws of the Republic of Korea"
+
+    # Data retention ----------------------------------------------------------
+    stale_session_hours: int = 24               # unfinished/failed scans are deleted after this
+    unpaid_order_hours: int = 48                # orders nobody paid for are deleted after this
+
     # Scanning / reconstruction --------------------------------------------
     sector_deg: float = 15.0            # one coverage sector of the capture ring
     orbit_pitch_deg: float = 30.0       # default downward tilt of the phone
@@ -40,6 +67,14 @@ class Settings(BaseSettings):
     capture_radius_units: float = 1.0   # orbit radius in reconstruction units
     default_capture_radius_mm: float = 450.0  # used only when no scale reference exists
     paper_size: str = "A4"
+
+    @property
+    def payments_enabled(self) -> bool:
+        return bool(self.stripe_secret_key)
+
+    @property
+    def legal_configured(self) -> bool:
+        return bool(self.company_name and self.support_email)
 
     @property
     def scans_dir(self) -> Path:

@@ -13,6 +13,8 @@ from ..db_models import FootProfile
 from ..schemas import ProfileOut
 from ..services.catalog.loader import get_shoe
 from ..services.fitting.last_matcher import build_last_spec
+from ..services.retention import profile_in_open_order
+from ..services.scanning.pipeline import delete_profile_data
 from ..services.scanning.measurements import FootMeasurements
 
 router = APIRouter(prefix="/api/profiles", tags=["profiles"])
@@ -80,3 +82,16 @@ def get_last_spec(profile_id: str, shoe: str | None = None, db: Session = Depend
             raise HTTPException(404, "shoe model not found")
         family = model.get("last_family")
     return {"profile_id": profile.id, "side": profile.side, "shoe": shoe, **build_last_spec(_measurements(profile), family)}
+
+
+@router.delete("/{profile_id}", status_code=204)
+def delete_profile(profile_id: str, db: Session = Depends(get_session)) -> None:
+    """Delete a foot profile (measurements, 3D model, scan record). Blocked while a preorder uses it."""
+    profile = _load(db, profile_id)
+    if profile_in_open_order(db, profile.id):
+        raise HTTPException(
+            409,
+            "This scan is attached to an open preorder, so we need it to make your shoes. "
+            "Cancel the preorder first (email us) and then delete the scan.",
+        )
+    delete_profile_data(db, profile)

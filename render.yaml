@@ -19,6 +19,17 @@ services:
         value: /data
       - key: SOLEMATE_CORS_ORIGINS
         value: '["https://YOURDOMAIN.com","https://www.YOURDOMAIN.com"]'
+      - key: SOLEMATE_PUBLIC_URL
+        value: https://YOURDOMAIN.com
+      # Secrets: paste these in the Render dashboard. They are never committed.
+      - key: SOLEMATE_STRIPE_SECRET_KEY
+        sync: false
+      - key: SOLEMATE_STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SOLEMATE_COMPANY_NAME
+        sync: false
+      - key: SOLEMATE_SUPPORT_EMAIL
+        sync: false
 
   - type: web
     name: solemate-web

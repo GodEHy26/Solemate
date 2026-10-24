@@ -9,6 +9,7 @@ import type {
   ShoeDetail,
   ShoeSummary,
   Side,
+  SiteConfig,
 } from './types';
 
 /** Set VITE_API_BASE (e.g. https://api.example.com) when the API lives on a different origin. */
@@ -47,6 +48,7 @@ const json = (body: unknown): RequestInit => ({
 
 export const api = {
   health: () => request<{ status: string }>('/api/health'),
+  config: () => request<SiteConfig>('/api/config'),
 
   // Scans ----------------------------------------------------------------
   capturePlan: () => request<CapturePlan>('/api/scans/plan'),
@@ -83,6 +85,9 @@ export const api = {
   // Orders ---------------------------------------------------------------
   createOrder: (body: unknown) => request<OrderOut>('/api/orders', json(body)),
   getOrder: (id: string) => request<OrderOut>(`/api/orders/${id}`),
+  startCheckout: (id: string) => request<{ url: string; session_id: string }>(`/api/orders/${id}/checkout`, { method: 'POST' }),
+  confirmOrder: (id: string) => request<OrderOut>(`/api/orders/${id}/confirm`, { method: 'POST' }),
+  deleteProfile: (id: string) => request<void>(`/api/profiles/${id}`, { method: 'DELETE' }),
 };
 
 /** Poll a scan until it leaves the processing state. */

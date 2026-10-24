@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, apiUrl } from '../lib/api';
 import type { FootProfile, ShoeSummary } from '../lib/types';
 import { FootprintChart, SectionChart } from '../components/viewer/FootprintChart';
@@ -16,6 +16,26 @@ export function ProfilePage() {
   const [lastSpec, setLastSpec] = useState<Record<string, unknown> | null>(null);
   const feet = useFeet((s) => s.profiles);
   const setFoot = useFeet((s) => s.setProfile);
+  const clearFeet = useFeet((s) => s.clear);
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const deleteScan = async () => {
+    if (!window.confirm('Delete this 3D scan and its measurements? This cannot be undone.')) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await api.deleteProfile(id);
+      const rest = Object.entries(feet).filter(([, v]) => v !== id);
+      clearFeet();
+      rest.forEach(([side, v]) => setFoot(side as 'left' | 'right', v as string));
+      navigate('/scan');
+    } catch (e) {
+      setDeleteError((e as Error).message);
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     api.getProfile(id).then((p) => {
@@ -119,7 +139,13 @@ export function ProfilePage() {
           </div>
           <div className="row">
             {!feet[other] && <Link className="btn primary" to="/scan">Scan {other} foot</Link>}
-            <Link className="btn ghost" to="/shoes">Build shoes</Link>
+            <Link className="btn ghost" to="/shoes">Preorder shoes</Link>
+          </div>
+          <div className="card stack">
+            <h3>Your data</h3>
+            <p className="small">Your photos were already deleted when this model was built. You can delete the model and measurements too. See the <Link to="/privacy">Privacy Policy</Link>.</p>
+            {deleteError && <div className="alert error">{deleteError}</div>}
+            <button className="btn danger" onClick={deleteScan} disabled={deleting}>{deleting ? 'Deleting…' : 'Delete this scan'}</button>
           </div>
         </div>
       </div>

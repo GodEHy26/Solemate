@@ -64,9 +64,7 @@ Alternative with one hostname: put both behind one reverse proxy (see `frontend/
 
 ## 4. Before taking real customers
 
-- **Payments**: orders are saved but nobody is charged yet. Add Stripe Checkout (see ROADMAP).
-- **Privacy policy and consent**: you collect foot photos, 3D models and emails. Say what you
-  keep, for how long, and let people delete a scan (`DELETE /api/scans/{id}` exists). Check the
-  rules where your customers live (GDPR in the EU, Korea's PIPA, and so on).
+- **Payments**: Stripe Checkout is built in. Follow `docs/PAYMENTS.md` (test mode first), then add the live keys on your host.
+- **Legal pages**: `/privacy` and `/terms` are templates that match the code. Set your name, email and address in the server environment and get them reviewed for the countries you sell to.
 - **Accounts and backups**: profiles currently live in the browser; back up the data volume.
 - **Real accuracy check**: compare scan measurements to a tape measure on real feet first.

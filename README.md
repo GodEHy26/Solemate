@@ -13,7 +13,7 @@ shoe fitter). Instead of recommending a stock shoe, it:
    component**: outsole (rubber, blown rubber, gum, polyurethane, TPU), midsole (EVA, PU, e-TPU,
    supercritical foam, cork latex), upper (engineered knit, canvas, mesh, leather, suede, recycled
    textile), lining, insole (including a 3D-printed lattice from the scan) and laces.
-4. **Takes orders** with server-side pricing and compatibility rules.
+4. **Sells everything as a preorder** with server-side pricing, Stripe Checkout, a privacy policy and preorder terms.
 
 > The shoe line-up in `backend/app/data/shoes.json` is a placeholder. Edit that file when the real
 > models are decided; nothing else needs to change. See `docs/CUSTOMIZATION.md`.
@@ -55,7 +55,7 @@ Publishing with a real domain is covered in `docs/DEPLOYMENT.md`.
 ## Tests
 
 ```bash
-cd backend && . .venv/bin/activate && python -m pytest      # 39 tests
+cd backend && . .venv/bin/activate && python -m pytest      # 57 tests
 cd frontend && npm test && npm run typecheck && npm run build
 ```
 
@@ -83,7 +83,7 @@ frontend/
     components/     scan/ viewer/ configurator/ layout/
     pages/          Home, Scan, Profile, Catalog, Configurator, Checkout, Order
     store/          cart, foot profiles
-docs/               ARCHITECTURE, SCAN_PIPELINE, CUSTOMIZATION, DEPLOYMENT, ROADMAP
+docs/               ARCHITECTURE, SCAN_PIPELINE, CUSTOMIZATION, DEPLOYMENT, PAYMENTS, ROADMAP
 ```
 
 ## API overview
@@ -101,7 +101,11 @@ docs/               ARCHITECTURE, SCAN_PIPELINE, CUSTOMIZATION, DEPLOYMENT, ROAD
 | GET | `/api/profiles/{id}/last-spec?shoe=` | Custom last specification |
 | GET | `/api/catalog/shoes` · `/shoes/{slug}` · `/components` | Catalog |
 | POST | `/api/catalog/price` | Validate and price a configuration |
-| POST | `/api/orders` · GET `/api/orders/{id}` | Orders |
+| POST | `/api/orders` · GET `/api/orders/{id}` | Create a preorder (needs consent and both foot profiles) |
+| POST | `/api/orders/{id}/checkout` · `/confirm` | Start Stripe payment · confirm it with Stripe |
+| POST | `/api/stripe/webhook` | Signed Stripe events |
+| DELETE | `/api/profiles/{id}` | Delete a scan |
+| GET | `/api/config` | Preorder wording and operator details |
 
 Interactive docs: http://localhost:8000/docs
 
