@@ -1,10 +1,13 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 // The API runs separately (uvicorn on :8000). In dev, /api is proxied so the
 // browser sees one origin; in production put both behind the same reverse proxy.
 export default defineConfig({
-  plugins: [react()],
+  // VITE_HTTPS=1 serves the dev server over a self-signed certificate so a phone on your
+  // Wi-Fi can use the camera and motion sensors (both require a secure context).
+  plugins: [react(), ...(process.env.VITE_HTTPS ? [basicSsl()] : [])],
   server: {
     port: 5173,
     host: true,

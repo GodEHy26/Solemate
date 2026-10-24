@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api, ApiError, waitForScan } from '../../lib/api';
 import { useCamera } from '../../lib/hooks/useCamera';
 import { useDeviceOrientation } from '../../lib/hooks/useOrientation';
@@ -45,6 +45,16 @@ export function ScanWizard() {
   const pending = useRef<Promise<unknown>[]>([]);
 
   const cameraActive = step === 'topdown' || step === 'orbit';
+  const insecure = typeof window !== 'undefined' && !window.isSecureContext;
+
+  // Keep the screen awake while the camera is in use.
+  useEffect(() => {
+    if (!(step === 'topdown' || step === 'orbit')) return;
+    type WakeNav = Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } };
+    let lock: { release: () => Promise<void> } | null = null;
+    (navigator as WakeNav).wakeLock?.request('screen').then((l) => { lock = l; }).catch(() => undefined);
+    return () => { void lock?.release(); };
+  }, [step]);
   const camera = useCamera(cameraActive);
   const orientation = useDeviceOrientation(step === 'orbit');
 
@@ -197,6 +207,12 @@ export function ScanWizard() {
         <span className="pill">{step}</span>
       </div>
       {error && <div className="alert error">{error}</div>}
+      {insecure && (
+        <div className="alert warning">
+          This page is not on HTTPS, so your phone will block the camera and motion sensors. Open the site over
+          https:// (see docs/DEPLOYMENT.md for a quick tunnel).
+        </div>
+      )}
 
       {step === 'intro' && (
         <div className="card stack">
@@ -223,6 +239,10 @@ export function ScanWizard() {
             Stand barefoot on a plain floor with the sheet of paper under your foot. Good, even light and a floor
             that contrasts with your skin give the cleanest result. Keep your lower leg still during the sweep.
           </div>
+          <p className="small muted">
+            Your photos are used only to build your 3D model and are deleted from our server as soon as it is built.
+            You can delete the model any time. See the <Link to="/privacy">Privacy Policy</Link>.
+          </p>
           <button className="btn primary lg" onClick={begin} disabled={!plan}>Start scan</button>
           <details>
             <summary className="muted small">Have a mesh from a LiDAR / TrueDepth app? Upload it instead.</summary>

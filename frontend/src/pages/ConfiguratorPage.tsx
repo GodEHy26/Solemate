@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { api } from '../lib/api';
+import { api, formatPrice } from '../lib/api';
 import { defaultColors, priceLocally } from '../lib/pricing';
 import type { PriceResult, ShoeDetail } from '../lib/types';
 import { ComponentPicker } from '../components/configurator/ComponentPicker';
@@ -73,7 +73,7 @@ export function ConfiguratorPage() {
       <div className="row between">
         <div>
           <Link to="/shoes" className="small">← All shoes</Link>
-          <h1>{shoe.name}</h1>
+          <h1>{shoe.name} <span className="pill warning">Preorder</span></h1>
           <p>{shoe.description}</p>
         </div>
         <div className="stack" style={{ alignItems: 'flex-end' }}>
@@ -105,6 +105,13 @@ export function ConfiguratorPage() {
             onAdd={add}
           />
         </div>
+      </div>
+      <div className="price-bar">
+        <div>
+          <div className="small muted">Preorder total</div>
+          <strong>{price ? formatPrice(price.total_cents, currency) : '…'}</strong>
+        </div>
+        <button className="btn primary" disabled={!price?.valid || pending} onClick={add}>Preorder</button>
       </div>
     </div>
   );

@@ -160,9 +160,30 @@ export interface CartItem {
   requires_scan: boolean;
 }
 
+export interface SiteConfig {
+  preorder: boolean;
+  ship_estimate: string;
+  shipping_policy: string;
+  payments_enabled: boolean;
+  terms_version: string;
+  legal: {
+    configured: boolean;
+    company_name: string;
+    support_email: string;
+    company_address: string;
+    governing_law: string;
+    stale_session_hours: number;
+    unpaid_order_hours: number;
+  };
+}
+
 export interface OrderOut {
   id: string;
   status: string;
+  preorder: boolean;
+  amount_paid_cents: number;
+  paid_at: string | null;
+  ship_estimate: string;
   customer_name: string;
   email: string;
   items: Array<{ shoe_name: string; quantity: number; line_cents: number; selections: Record<string, string> }>;

@@ -7,7 +7,7 @@
 - Shape-from-silhouette reconstruction, paper-based metric scale, mesh export (GLB/OBJ).
 - Foot measurements, size guide, custom last specification from graded reference lasts.
 - Component catalog with materials, properties, colours, compatibility rules and pricing.
-- Cart, checkout and order persistence (no payment yet).
+- Preorder-only storefront, Stripe Checkout with signed webhooks, privacy policy, preorder terms, scan deletion and automatic retention purges.
 - Test suites: 39 backend tests (synthetic end-to-end scan), 8 frontend tests.
 
 ## Next
@@ -15,7 +15,7 @@
 1. **Real shoe line-up** — replace the placeholder models in `backend/app/data/shoes.json`, add product
    photos and per-model GLBs for the configurator preview.
 2. **Accounts** — sign-in so foot profiles and orders follow the customer (currently localStorage).
-3. **Payments** — Stripe Checkout on order creation; add shipping and tax lines.
+3. **Shipping and tax** — add Stripe Tax and shipping rates; optional deposit plus balance payment.
 4. **Pose estimation** — use ARKit/ARCore camera poses (native wrapper) or structure-from-motion so
    the carve uses real extrinsics instead of the ideal orbit rig.
 5. **Learned segmentation** — a small foot/background segmenter for difficult floors.

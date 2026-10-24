@@ -5,7 +5,7 @@ export function HomePage() {
     <div className="container">
       <section className="hero">
         <div>
-          <span className="pill accent">Scan · Fit · Build</span>
+          <span className="pill warning">Preorders open</span>
           <h1 style={{ marginTop: 12 }}>Shoes made for the exact shape of your feet.</h1>
           <p className="lead">
             Sweep your phone around each foot, the way you set up Face ID. SoleMate turns the sweep into a 3D
@@ -13,7 +13,7 @@ export function HomePage() {
             polyurethane or rubber outsole to a knit or cloth upper.
           </p>
           <div className="row mt">
-            <Link to="/scan" className="btn primary lg">Scan my feet</Link>
+            <Link to="/scan" className="btn primary lg">Scan my feet to preorder</Link>
             <Link to="/shoes" className="btn ghost lg">Browse shoes</Link>
           </div>
         </div>
@@ -40,8 +40,8 @@ export function HomePage() {
             </div>
             <div className="step">
               <div>
-                <strong>Configure and order.</strong>
-                <p className="small">Choose outsole, midsole, upper, lining, insole and laces. The last is yours.</p>
+                <strong>Configure and preorder.</strong>
+                <p className="small">Choose outsole, midsole, upper, lining, insole and laces. Your pair is made after you order, not before.</p>
               </div>
             </div>
           </div>
@@ -50,8 +50,8 @@ export function HomePage() {
 
       <section className="grid mt">
         <div className="card">
-          <h3>No special hardware</h3>
-          <p className="small mt">Works in the browser with a normal phone camera. Depth-sensor meshes from a companion app can be uploaded too.</p>
+          <h3>Preorders, not stock</h3>
+          <p className="small mt">Nothing is in a warehouse. Every pair is made to order from your scan, so shipping dates are estimates. See the <Link to="/terms">Preorder Terms</Link>.</p>
         </div>
         <div className="card">
           <h3>A last, not a size</h3>

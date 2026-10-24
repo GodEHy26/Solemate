@@ -16,6 +16,7 @@ dependencies = [
   "trimesh>=4.4",
   "pillow>=10",
   "email-validator>=2",
+  "stripe>=14",
 ]
 
 [project.optional-dependencies]

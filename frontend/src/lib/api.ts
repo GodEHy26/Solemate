@@ -9,7 +9,14 @@ import type {
   ShoeDetail,
   ShoeSummary,
   Side,
+  SiteConfig,
 } from './types';
+
+/** Set VITE_API_BASE (e.g. https://api.example.com) when the API lives on a different origin. */
+export const API_BASE: string = ((import.meta.env.VITE_API_BASE as string | undefined) ?? '').replace(/\/$/, '');
+
+/** Turn an API-relative path such as /api/profiles/x/mesh.glb into a full URL. */
+export const apiUrl = (path: string) => (path.startsWith('http') ? path : `${API_BASE}${path}`);
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -18,7 +25,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, init);
+  const res = await fetch(apiUrl(path), init);
   if (!res.ok) {
     let detail = res.statusText;
     try {
@@ -41,6 +48,7 @@ const json = (body: unknown): RequestInit => ({
 
 export const api = {
   health: () => request<{ status: string }>('/api/health'),
+  config: () => request<SiteConfig>('/api/config'),
 
   // Scans ----------------------------------------------------------------
   capturePlan: () => request<CapturePlan>('/api/scans/plan'),
@@ -77,6 +85,9 @@ export const api = {
   // Orders ---------------------------------------------------------------
   createOrder: (body: unknown) => request<OrderOut>('/api/orders', json(body)),
   getOrder: (id: string) => request<OrderOut>(`/api/orders/${id}`),
+  startCheckout: (id: string) => request<{ url: string; session_id: string }>(`/api/orders/${id}/checkout`, { method: 'POST' }),
+  confirmOrder: (id: string) => request<OrderOut>(`/api/orders/${id}/confirm`, { method: 'POST' }),
+  deleteProfile: (id: string) => request<void>(`/api/profiles/${id}`, { method: 'DELETE' }),
 };
 
 /** Poll a scan until it leaves the processing state. */
