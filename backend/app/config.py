@@ -48,8 +48,8 @@ class Settings(BaseSettings):
     stripe_api_base: str = ""                   # tests only: point the SDK at a local fake
 
     # Operator details shown on the legal pages -------------------------------
-    company_name: str = ""
-    support_email: str = ""
+    company_name: str = "Ethan Hahn"
+    support_email: str = "godehy26@gmail.com"
     company_address: str = ""
     governing_law: str = ""                     # e.g. "the laws of the Republic of Korea"
 

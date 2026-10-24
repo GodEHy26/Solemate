@@ -69,8 +69,9 @@ where you sell, then edit the text in `frontend/src/pages/TermsPage.tsx` or the 
 | Access by long random link, no accounts | true today; see ROADMAP for accounts |
 
 The policy and terms are **templates written to match this code, not legal advice**. Before taking
-real money: fill in your name, email and address (`SOLEMATE_COMPANY_NAME`, `SOLEMATE_SUPPORT_EMAIL`,
-`SOLEMATE_COMPANY_ADDRESS`, `SOLEMATE_GOVERNING_LAW`), have them reviewed for the countries you
+real money: check the operator name and email (defaults in `backend/app/config.py`), decide whether
+you need a published address (`SOLEMATE_COMPANY_ADDRESS`, required for online sellers in the EU, UK
+and Korea, among others) and set `SOLEMATE_GOVERNING_LAW`, have them reviewed for the countries you
 sell to, and keep this file in sync when you change how data is handled. The pages show a warning
 until the name and email are set.
 
