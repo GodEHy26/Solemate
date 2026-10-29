@@ -2,8 +2,7 @@
 
 **Custom shoes built from a 3D scan of your feet.**
 
-SoleMate v2 is the successor to the Sole-Mate IB Computer Science IA (a single-photo basketball
-shoe fitter). Instead of recommending a stock shoe, it:
+SoleMate:
 
 1. **Scans each foot in 3D** with a Face-ID style sweep in the browser: a top-down photo on a
    sheet of paper for scale, then an orbit around the foot guided by a progress ring.
