@@ -1,0 +1,30 @@
+[project]
+name = "solemate-api"
+version = "2.0.0"
+description = "SoleMate API: 3D foot scanning and custom shoe configuration"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.3",
+  "sqlmodel>=0.0.21",
+  "python-multipart>=0.0.9",
+  "numpy>=1.26",
+  "opencv-python-headless>=4.10",
+  "scikit-image>=0.24",
+  "trimesh>=4.4",
+  "pillow>=10",
+  "email-validator>=2",
+  "stripe>=14",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+include = ["app*"]

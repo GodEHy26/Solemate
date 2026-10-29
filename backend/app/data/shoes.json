@@ -1,0 +1,65 @@
+{
+  "_comment": "PLACEHOLDER LINE-UP. Replace or extend these entries when the real models are decided. allowed_options may be \"*\" (every option of that component) or a list of option ids.",
+  "shoes": [
+    {
+      "slug": "solemate-court",
+      "name": "SoleMate Court",
+      "tagline": "Performance basketball shoe built on your scan.",
+      "description": "The spiritual successor to the original Sole-Mate project: a court shoe with a custom last, lockdown tuned to your instep height and a toe box cut to your toe width.",
+      "category": "basketball",
+      "last_family": "court",
+      "base_price_cents": 21900,
+      "placeholder": true,
+      "hero_color": "#2e86de",
+      "allowed_options": {
+        "outsole": ["rubber", "blown_rubber", "gum_rubber", "tpu"],
+        "midsole": ["eva", "etpu", "supercritical", "pu"],
+        "upper": ["engineered_knit", "mesh", "full_grain_leather", "recycled_textile"],
+        "lining": "*",
+        "insole": "*",
+        "laces": "*"
+      },
+      "defaults": {"outsole": "rubber", "midsole": "etpu", "upper": "engineered_knit", "lining": "moisture_wicking", "insole": "custom_printed", "laces": "flat_cotton"}
+    },
+    {
+      "slug": "solemate-stride",
+      "name": "SoleMate Stride",
+      "tagline": "Everyday runner with a scan-matched toe box.",
+      "description": "Neutral daily trainer. Pick the foam, choose the upper, and the last is graded to your foot length and ball girth.",
+      "category": "running",
+      "last_family": "run",
+      "base_price_cents": 18900,
+      "placeholder": true,
+      "hero_color": "#ff6b35",
+      "allowed_options": {
+        "outsole": ["rubber", "blown_rubber", "polyurethane"],
+        "midsole": ["eva", "etpu", "supercritical"],
+        "upper": ["engineered_knit", "mesh", "recycled_textile"],
+        "lining": "*",
+        "insole": "*",
+        "laces": "*"
+      },
+      "defaults": {"outsole": "blown_rubber", "midsole": "supercritical", "upper": "mesh", "lining": "moisture_wicking", "insole": "custom_printed", "laces": "round_poly"}
+    },
+    {
+      "slug": "solemate-daily",
+      "name": "SoleMate Daily",
+      "tagline": "Casual low-top in cloth, leather or suede.",
+      "description": "A clean everyday sneaker. Canvas, leather or suede uppers on a rubber, PU or gum sole with an optional cork footbed.",
+      "category": "lifestyle",
+      "last_family": "daily",
+      "base_price_cents": 15900,
+      "placeholder": true,
+      "hero_color": "#2a9d8f",
+      "allowed_options": {
+        "outsole": ["rubber", "gum_rubber", "polyurethane"],
+        "midsole": ["eva", "pu", "cork_latex"],
+        "upper": ["canvas", "full_grain_leather", "suede", "recycled_textile"],
+        "lining": "*",
+        "insole": "*",
+        "laces": "*"
+      },
+      "defaults": {"outsole": "gum_rubber", "midsole": "eva", "upper": "canvas", "lining": "textile", "insole": "foam", "laces": "flat_cotton"}
+    }
+  ]
+}

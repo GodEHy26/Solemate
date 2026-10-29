@@ -1,0 +1,46 @@
+# Render Blueprint: API (Docker) + static frontend.
+# Replace YOURDOMAIN.com after you buy a domain, then in Render: New > Blueprint > pick this repo.
+# NOTE: a persistent disk needs a paid instance. On a free instance, scans and the SQLite
+# database are wiped at every deploy/restart; use that only for demos.
+services:
+  - type: web
+    name: solemate-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: solemate-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: SOLEMATE_DATA_DIR
+        value: /data
+      - key: SOLEMATE_CORS_ORIGINS
+        value: '["https://YOURDOMAIN.com","https://www.YOURDOMAIN.com"]'
+      - key: SOLEMATE_PUBLIC_URL
+        value: https://YOURDOMAIN.com
+      # Secrets: paste these in the Render dashboard. They are never committed.
+      - key: SOLEMATE_STRIPE_SECRET_KEY
+        sync: false
+      - key: SOLEMATE_STRIPE_WEBHOOK_SECRET
+        sync: false
+
+  - type: web
+    name: solemate-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci --no-audit --no-fund && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE
+        value: https://api.YOURDOMAIN.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache

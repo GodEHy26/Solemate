@@ -1,0 +1,14 @@
+{
+  "_comment": "Reference lasts measured at US men's 10. The first five come from the IB IA shoe database (internal shoe dimensions); use them as base lasts until real last data is available. waist_position_mm = heel-to-narrowest-point, toe_width_mm = width across the toe area, toe_height_mm = vertical toe room.",
+  "lasts": [
+    {"id": "court-don6", "name": "Court last (D.O.N. Issue 6 geometry)", "family": "court", "base_size_us": 10.0, "length_mm": 271.0, "ball_width_mm": 102.3, "toe_width_mm": 75.4, "toe_height_mm": 25.7, "waist_position_mm": 156.5},
+    {"id": "court-ae1", "name": "Court last (Anthony Edwards 1 geometry)", "family": "court", "base_size_us": 10.0, "length_mm": 271.0, "ball_width_mm": 107.3, "toe_width_mm": 75.6, "toe_height_mm": 27.1, "waist_position_mm": 158.2},
+    {"id": "court-gtcut3", "name": "Court last (GT Cut 3 geometry)", "family": "court", "base_size_us": 10.0, "length_mm": 270.0, "ball_width_mm": 102.3, "toe_width_mm": 77.3, "toe_height_mm": 27.4, "waist_position_mm": 155.8},
+    {"id": "court-book1", "name": "Court last (Book 1 geometry)", "family": "court", "base_size_us": 10.0, "length_mm": 270.0, "ball_width_mm": 100.2, "toe_width_mm": 77.9, "toe_height_mm": 27.4, "waist_position_mm": 154.6},
+    {"id": "court-ja2", "name": "Court last (Ja 2 geometry)", "family": "court", "base_size_us": 10.0, "length_mm": 270.0, "ball_width_mm": 98.7, "toe_width_mm": 78.5, "toe_height_mm": 31.4, "waist_position_mm": 153.4},
+    {"id": "run-neutral", "name": "Running last (neutral)", "family": "run", "base_size_us": 10.0, "length_mm": 272.0, "ball_width_mm": 101.0, "toe_width_mm": 80.0, "toe_height_mm": 30.0, "waist_position_mm": 152.0},
+    {"id": "run-wide", "name": "Running last (wide)", "family": "run", "base_size_us": 10.0, "length_mm": 272.0, "ball_width_mm": 108.0, "toe_width_mm": 86.0, "toe_height_mm": 31.0, "waist_position_mm": 152.0},
+    {"id": "daily-classic", "name": "Casual last (classic)", "family": "daily", "base_size_us": 10.0, "length_mm": 270.0, "ball_width_mm": 100.0, "toe_width_mm": 74.0, "toe_height_mm": 26.0, "waist_position_mm": 155.0},
+    {"id": "daily-roomy", "name": "Casual last (roomy toe box)", "family": "daily", "base_size_us": 10.0, "length_mm": 270.0, "ball_width_mm": 105.0, "toe_width_mm": 84.0, "toe_height_mm": 30.0, "waist_position_mm": 155.0}
+  ]
+}
