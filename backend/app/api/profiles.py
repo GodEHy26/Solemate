@@ -1,4 +1,4 @@
-
+"""Foot profiles: measurements, meshes and the custom last specification."""
 from __future__ import annotations
 
 import json
@@ -73,7 +73,7 @@ def to_out(profile: FootProfile) -> ProfileOut:
 
 @router.get("/fit-check")
 def fit_check(left: str, right: str, db: Session = Depends(get_session)) -> dict:
-
+    """Both feet together: every warning, the left/right comparison, and the size to show."""
     return pair_check(foot_assessment(_load(db, left)), foot_assessment(_load(db, right)))
 
 
@@ -95,7 +95,7 @@ def get_mesh(profile_id: str, ext: str, db: Session = Depends(get_session)) -> F
 
 @router.get("/{profile_id}/last-spec")
 def get_last_spec(profile_id: str, shoe: str | None = None, db: Session = Depends(get_session)) -> dict:
-
+    """Custom last specification, optionally restricted to a shoe model's last family."""
     profile = _load(db, profile_id)
     family = None
     if shoe:
@@ -108,7 +108,7 @@ def get_last_spec(profile_id: str, shoe: str | None = None, db: Session = Depend
 
 @router.delete("/{profile_id}", status_code=204)
 def delete_profile(profile_id: str, db: Session = Depends(get_session)) -> None:
-
+    """Delete a foot profile (measurements, 3D model, scan record). Blocked while a preorder uses it."""
     profile = _load(db, profile_id)
     if profile_in_open_order(db, profile.id):
         raise HTTPException(

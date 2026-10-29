@@ -1,3 +1,6 @@
+// Client-side mirror of backend/app/services/catalog/pricing.py for instant
+// feedback while configuring. The server re-prices every order, so this is a
+// convenience, not the source of truth.
 import type { ShoeDetail } from './types';
 
 export interface LocalPrice {
@@ -31,7 +34,7 @@ export function priceLocally(shoe: ShoeDetail, selections: Record<string, string
   };
 }
 
-
+/** Default colour per component: the first swatch of the selected option. */
 export function defaultColors(shoe: ShoeDetail, selections: Record<string, string>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const comp of shoe.components) {

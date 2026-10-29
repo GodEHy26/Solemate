@@ -1,13 +1,13 @@
+"""Foot measurements from a reconstructed volume and mesh.
 
+All inputs are in millimetres. The foot is first aligned so that its long
+axis runs along +X with the heel at x = 0, the floor at z = 0 and the
+footprint centred on y = 0; every landmark is then a window along X.
 
-
-
-
-
-
-
-
-
+Landmark windows (fraction of foot length from the heel) follow common
+last-making practice: heel 0-20 %, waist (narrowest) 35-55 %, instep 40-55 %,
+ball (widest) 55-80 %, toes 85-100 %.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
@@ -50,7 +50,7 @@ class FootMeasurements:
         return {k: (round(v, 1) if isinstance(v, float) else v) for k, v in asdict(self).items()}
 
     def last_vector(self) -> tuple[float, float, float, float, float]:
-
+        """5-D vector compatible with the reference-last KD-tree."""
         return (
             self.length_mm,
             self.ball_width_mm,
@@ -70,9 +70,9 @@ class FootGeometry:
     transform: dict = field(default_factory=dict)
 
 
-
-
-
+# ---------------------------------------------------------------------------
+# Alignment
+# ---------------------------------------------------------------------------
 def _rot_z(theta: float) -> np.ndarray:
     c, s = cos(theta), sin(theta)
     return np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
@@ -91,7 +91,7 @@ def _max_width(xy: np.ndarray, spacing: float, bins: int = 20) -> float:
 
 
 def align_points(points: np.ndarray, spacing: float) -> tuple[np.ndarray, np.ndarray]:
-
+    """Return (R, offset) such that ``p_aligned = R @ p + offset`` puts the foot in canonical pose."""
     pts = np.asarray(points, dtype=np.float64)
     if len(pts) < 10:
         raise ReconstructionError("too few points to align")
@@ -105,7 +105,7 @@ def align_points(points: np.ndarray, spacing: float) -> tuple[np.ndarray, np.nda
     centered = pts - np.array([mean[0], mean[1], 0.0])
     aligned = centered @ R.T
 
-
+    # Toe end is the wider end (ball vs heel): flip if the rear half is wider.
     mid = (aligned[:, 0].min() + aligned[:, 0].max()) / 2
     front = aligned[aligned[:, 0] >= mid]
     back = aligned[aligned[:, 0] < mid]
@@ -116,9 +116,9 @@ def align_points(points: np.ndarray, spacing: float) -> tuple[np.ndarray, np.nda
 
     offset_after = np.array(
         [
-            -aligned[:, 0].min() + spacing / 2,
-            -(aligned[:, 1].max() + aligned[:, 1].min()) / 2,
-            -aligned[:, 2].min() + spacing / 2,
+            -aligned[:, 0].min() + spacing / 2,          # heel face at x = 0
+            -(aligned[:, 1].max() + aligned[:, 1].min()) / 2,  # centre footprint on y = 0
+            -aligned[:, 2].min() + spacing / 2,          # floor at z = 0
         ]
     )
     total_offset = R @ (-np.array([mean[0], mean[1], 0.0])) + offset_after
@@ -132,11 +132,11 @@ def transform_matrix(R: np.ndarray, offset: np.ndarray) -> np.ndarray:
     return T
 
 
-
-
-
+# ---------------------------------------------------------------------------
+# Profiles and landmarks
+# ---------------------------------------------------------------------------
 def _profiles(pts: np.ndarray, spacing: float, bins: int = 60) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-
+    """Per-station x centre, width and height along the foot."""
     length = pts[:, 0].max() + spacing / 2
     edges = np.linspace(0.0, length, bins + 1)
     centers = (edges[:-1] + edges[1:]) / 2
@@ -153,7 +153,7 @@ def _profiles(pts: np.ndarray, spacing: float, bins: int = 60) -> tuple[np.ndarr
 def _window(centers: np.ndarray, length: float, name: str) -> np.ndarray:
     lo, hi = WINDOWS[name]
     sel = (centers >= lo * length) & (centers <= hi * length)
-    if not sel.any():
+    if not sel.any():  # very coarse grid: fall back to nearest station
         idx = int(np.clip(np.argmin(np.abs(centers - (lo + hi) / 2 * length)), 0, len(centers) - 1))
         sel = np.zeros_like(centers, dtype=bool)
         sel[idx] = True
@@ -161,7 +161,7 @@ def _window(centers: np.ndarray, length: float, name: str) -> np.ndarray:
 
 
 def _girth(mesh: trimesh.Trimesh, x_mm: float) -> tuple[float | None, list[list[float]]]:
-
+    """Perimeter of the mesh cross-section at x = x_mm and an ordered outline in (y, z)."""
     try:
         section = mesh.section(plane_origin=[x_mm, 0.0, 0.0], plane_normal=[1.0, 0.0, 0.0])
     except Exception:  # noqa: BLE001 - trimesh raises assorted errors on degenerate sections
@@ -185,7 +185,7 @@ def _girth(mesh: trimesh.Trimesh, x_mm: float) -> tuple[float | None, list[list[
 
 
 def _footprint_polygon(pts: np.ndarray, spacing: float) -> list[list[float]]:
-
+    """Outline of the footprint (projection on the floor) as a polygon in mm."""
     x = pts[:, 0]
     y = pts[:, 1]
     ymin = y.min() - spacing
@@ -196,22 +196,22 @@ def _footprint_polygon(pts: np.ndarray, spacing: float) -> list[list[float]]:
     iy = np.clip(np.floor((y - ymin) / spacing).astype(int), 0, ny - 1)
     mask[ix, iy] = 1
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-    mask = cv2.dilate(mask, np.ones((3, 3), np.uint8))
+    mask = cv2.dilate(mask, np.ones((3, 3), np.uint8))  # outline through voxel faces, not centres
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         return []
     contour = max(contours, key=cv2.contourArea)
     approx = cv2.approxPolyDP(contour, max(0.6, spacing * 0.5), True).reshape(-1, 2)
-
+    # contour points are (col=iy, row=ix)
     poly = [[round(float(row * spacing), 2), round(float(ymin + col * spacing), 2)] for col, row in approx]
     return poly
 
 
-
-
-
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
 def analyze_foot(grid: VoxelGrid, mesh: trimesh.Trimesh | None = None, stations: int = 60) -> FootGeometry:
-
+    """Compute measurements from a grid in millimetres (and optionally its mesh)."""
     spacing = float(np.mean(grid.spacing))
     raw = grid.occupied_points()
     if len(raw) == 0:
@@ -295,7 +295,7 @@ def analyze_foot(grid: VoxelGrid, mesh: trimesh.Trimesh | None = None, stations:
 
 
 def aligned_mesh(mesh: trimesh.Trimesh, grid: VoxelGrid) -> trimesh.Trimesh:
-
+    """Return a copy of ``mesh`` in the canonical foot pose used by ``analyze_foot``."""
     spacing = float(np.mean(grid.spacing))
     R, offset = align_points(grid.occupied_points(), spacing)
     out = mesh.copy()

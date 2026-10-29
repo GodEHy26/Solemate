@@ -19,6 +19,7 @@ function FootModel({ url, color }: { url: string; color: string }) {
     });
     return s;
   }, [gltf, color]);
+  // The mesh is in millimetres with Z up; three.js is Y up. Convert to ~decimetre units.
   return (
     <group rotation={[-Math.PI / 2, 0, 0]} scale={0.01}>
       <primitive object={scene} />

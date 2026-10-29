@@ -1,4 +1,4 @@
-
+"""Filesystem + database orchestration around the reconstructors."""
 from __future__ import annotations
 
 import json
@@ -39,7 +39,7 @@ def delete_session_files(session_id: str) -> None:
 
 
 def save_frame(session_id: str, index: int, kind: str, data: bytes) -> Path:
-
+    """Persist an uploaded frame after checking it decodes as an image."""
     arr = np.frombuffer(data, dtype=np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
     if img is None:
@@ -59,7 +59,7 @@ def save_mesh_upload(session_id: str, filename: str, data: bytes) -> Path:
 
 
 def discard_raw_inputs(session_id: str) -> None:
-
+    """Privacy: once the 3D model exists the photos are no longer needed, so remove them."""
     d = get_settings().scans_dir / session_id
     shutil.rmtree(d / "frames", ignore_errors=True)
     for f in d.glob("upload.*"):
@@ -67,7 +67,7 @@ def discard_raw_inputs(session_id: str) -> None:
 
 
 def delete_profile_data(db: Session, profile: FootProfile) -> None:
-
+    """Remove a foot profile, its meshes and the scan session it came from."""
     session = db.get(ScanSession, profile.scan_session_id)
     delete_session_files(profile.scan_session_id)
     db.delete(profile)
@@ -134,7 +134,7 @@ def _persist_result(db: Session, session: ScanSession, result: ScanResult) -> Fo
 
 
 def process_session(session_id: str) -> None:
-
+    """Run the photo pipeline for a session and store the resulting profile."""
     with Session(get_engine()) as db:
         session = db.get(ScanSession, session_id)
         if session is None:

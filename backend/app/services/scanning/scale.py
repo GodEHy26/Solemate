@@ -1,10 +1,10 @@
+"""Absolute scale from a sheet of paper in the top-down frame.
 
-
-
-
-
-
-
+Silhouettes alone recover shape only up to scale. The top-down capture asks
+the user to stand on a sheet of A4/Letter paper: the sheet's corners give a
+homography to a metric plane, so foot length and width in millimetres can be
+measured directly, and the 3D hull is scaled to match.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -41,7 +41,7 @@ class TopDownMeasurement:
 
 
 def order_corners(pts: np.ndarray) -> np.ndarray:
-
+    """Order 4 points as top-left, top-right, bottom-right, bottom-left."""
     pts = np.asarray(pts, dtype=np.float64).reshape(4, 2)
     s = pts.sum(axis=1)
     d = np.diff(pts, axis=1).ravel()
@@ -56,7 +56,7 @@ def _quad_aspect(quad: np.ndarray) -> float:
 
 
 def _is_frame_border(quad: np.ndarray, shape: tuple[int, int], margin: int = 3) -> bool:
-
+    """True when the 'sheet' is just the photo's own edges (a bright floor filling the frame)."""
     h, w = shape
     near = [(x <= margin or x >= w - 1 - margin) and (y <= margin or y >= h - 1 - margin) for x, y in quad]
     return sum(near) >= 3
@@ -69,11 +69,11 @@ def detect_paper(
     max_area_fraction: float = 0.92,
     aspect_tolerance: float = 0.20,
 ) -> np.ndarray | None:
+    """Find the bright paper sheet and return its 4 ordered corners in pixels, or None.
 
-
-
-
-
+    A candidate must be a bright quadrilateral that does not fill the frame and, when ``paper``
+    is given, whose long/short side ratio is within ``aspect_tolerance`` of that paper size.
+    """
     gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (7, 7), 0)
     img_area = float(gray.shape[0] * gray.shape[1])
@@ -86,13 +86,13 @@ def detect_paper(
 
 
 def _bright_masks(blur: np.ndarray):
+    """Candidate paper masks, tried in order.
 
-
-
-
-
-
-
+    1. One Otsu split. Works when the floor is clearly darker than the paper.
+    2. Otsu again over only the pixels the first split called bright. When the foot is darker
+       than the floor (a black sock on light tiles), the first split separates foot from
+       paper + floor together; the second split then separates paper from floor.
+    """
     kernel = np.ones((9, 9), np.uint8)
     t1, first = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     yield cv2.morphologyEx(first, cv2.MORPH_CLOSE, kernel)
@@ -112,7 +112,7 @@ def _find_paper_quad(bright, shape, img_area, paper, min_area_fraction, max_area
         a, b = PAPER_SIZES_MM[paper.upper()]
         expected = b / a
     for contour in sorted(contours, key=cv2.contourArea, reverse=True)[:5]:
-        hull = cv2.convexHull(contour)
+        hull = cv2.convexHull(contour)  # repairs bites where the leg crosses the paper edge
         area = cv2.contourArea(hull) / img_area
         if area < min_area_fraction or area > max_area_fraction:
             continue
@@ -131,12 +131,12 @@ def _find_paper_quad(bright, shape, img_area, paper, min_area_fraction, max_area
 
 
 def rectify(image_bgr: np.ndarray, corners: np.ndarray, paper: str = "A4") -> tuple[np.ndarray, float]:
-
+    """Warp the paper to a metric canvas; returns (warped image, mm per pixel)."""
     short_mm, long_mm = PAPER_SIZES_MM[paper.upper()]
     tl, tr, br, bl = corners
     top_len = np.linalg.norm(tr - tl)
     left_len = np.linalg.norm(bl - tl)
-    if top_len >= left_len:
+    if top_len >= left_len:  # landscape in the image
         w_mm, h_mm = long_mm, short_mm
     else:
         w_mm, h_mm = short_mm, long_mm
@@ -149,7 +149,7 @@ def rectify(image_bgr: np.ndarray, corners: np.ndarray, paper: str = "A4") -> tu
 
 
 def segment_foot_on_paper(warped_bgr: np.ndarray, margin_fraction: float = 0.005) -> np.ndarray:
-
+    """Foot = darker/saturated region inside the rectified white sheet."""
     gray = cv2.cvtColor(warped_bgr, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (7, 7), 0)
     _, th = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
@@ -169,13 +169,13 @@ def segment_foot_on_paper(warped_bgr: np.ndarray, margin_fraction: float = 0.005
 
 
 def _forefoot_width_px(mask: np.ndarray, station_px: float = 6.0) -> float | None:
+    """Widest cross-section in the toe half of the foot, ignoring the ankle and leg.
 
-
-
-
-
-
-
+    Standing on the paper, the lower leg often overlaps the heel end of the mask and inflates
+    the bounding-box width. The foot's long axis comes from PCA; the heel end is the end that
+    touches the paper edge (heel against a stop) or, failing that, the wider end (ankle/leg).
+    Returns None when the foot is too small to profile.
+    """
     ys, xs = np.nonzero(mask)
     if len(xs) < 500:
         return None
@@ -203,7 +203,7 @@ def _forefoot_width_px(mask: np.ndarray, station_px: float = 6.0) -> float | Non
 
 
 def measure_topdown(image_bgr: np.ndarray, paper: str = "A4") -> TopDownMeasurement | None:
-
+    """Metric foot length/width from a top-down photo of a foot on paper."""
     paper = paper.upper()
     if paper not in PAPER_SIZES_MM:
         raise ValueError(f"unknown paper size: {paper}")

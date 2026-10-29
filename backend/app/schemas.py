@@ -1,4 +1,4 @@
-
+"""Request / response models for the HTTP API."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -9,6 +9,7 @@ from pydantic import BaseModel, EmailStr, Field
 Side = Literal["left", "right"]
 
 
+# Scans ---------------------------------------------------------------------
 class ScanCreate(BaseModel):
     side: Side = "left"
     known_length_mm: float | None = Field(default=None, gt=100, lt=400)
@@ -54,6 +55,7 @@ class ScanOut(BaseModel):
     updated_at: datetime
 
 
+# Profiles ------------------------------------------------------------------
 class ProfileOut(BaseModel):
     id: str
     scan_session_id: str
@@ -75,11 +77,13 @@ class ProfileOut(BaseModel):
     created_at: datetime
 
 
+# Configurator --------------------------------------------------------------
 class PriceRequest(BaseModel):
     shoe_slug: str
     selections: dict[str, str]
 
 
+# Orders --------------------------------------------------------------------
 class OrderItemIn(BaseModel):
     shoe_slug: str
     selections: dict[str, str]

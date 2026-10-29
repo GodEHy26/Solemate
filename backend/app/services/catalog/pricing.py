@@ -1,4 +1,4 @@
-
+"""Validate a configuration against the catalog and price it."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

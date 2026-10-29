@@ -1,4 +1,9 @@
+"""Turn measurements plus quality warnings into what the customer sees: a size, a range, or nothing.
 
+* no warnings      -> one size
+* any ``warn``     -> the two half sizes the measurement falls between ("9 to 9.5"), with the reason
+* any ``block``    -> no size, only the retake prompt
+"""
 from __future__ import annotations
 
 import math
@@ -10,7 +15,7 @@ TOE_ALLOWANCE_MM = 10.0
 
 
 def exact_sizes(foot_length_mm: float, toe_allowance_mm: float = TOE_ALLOWANCE_MM) -> dict[str, float]:
-
+    """Unrounded chart sizes for the shoe (foot length plus toe allowance)."""
     shoe = foot_length_mm + toe_allowance_mm
     us = 3.0 * (shoe / MM_PER_INCH) - 22.0
     return {
@@ -56,11 +61,11 @@ def size_summary(foot_length_mm: float, ball_width_mm: float, warnings: list[Sca
 
 
 def pair_check(left: dict, right: dict) -> dict:
+    """Combine two foot assessments.
 
-
-
-
-
+    ``left``/``right``: ``{"length_mm", "ball_width_mm", "warnings": [ScanWarning]}``.
+    Sizes follow the longer foot, the usual rule for a pair.
+    """
     warnings: list[ScanWarning] = []
     for side, foot in (("left", left), ("right", right)):
         for w in foot["warnings"]:

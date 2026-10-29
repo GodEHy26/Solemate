@@ -1,5 +1,5 @@
-
-
+"""Stripe webhook receiver. Signature-verified; the only thing that can mark an order paid besides
+the explicit confirm call (which itself asks Stripe)."""
 from __future__ import annotations
 
 import logging
@@ -23,7 +23,7 @@ async def webhook(request: Request, db: Session = Depends(get_session)) -> dict:
         event = payments.construct_event(payload, request.headers.get("stripe-signature"))
     except payments.PaymentsNotConfigured as exc:
         raise HTTPException(503, str(exc)) from exc
-    except Exception as exc:
+    except Exception as exc:  # bad payload or signature (ValueError / SignatureVerificationError)
         raise HTTPException(400, "invalid webhook signature") from exc
 
     etype = event["type"]

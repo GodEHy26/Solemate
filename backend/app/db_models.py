@@ -1,4 +1,8 @@
+"""Persistent tables: scan sessions, foot profiles and orders.
 
+Large blobs (frames, meshes) live on disk under ``settings.scans_dir``; the
+database stores metadata plus JSON documents for measurements and orders.
+"""
 from __future__ import annotations
 
 import uuid
@@ -58,6 +62,7 @@ class Order(SQLModel, table=True):
 
     id: str = Field(default_factory=_uuid, primary_key=True)
     created_at: datetime = Field(default_factory=_now)
+    # awaiting_payment -> preordered (paid) ; payment_failed | needs_review | cancelled
     status: str = Field(default="awaiting_payment", index=True)
     customer_name: str
     email: str

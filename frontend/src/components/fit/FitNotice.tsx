@@ -2,6 +2,7 @@ import type { FitCheck } from '../../lib/types';
 import { SizeDisplay } from './SizeDisplay';
 import { WarningList } from './WarningList';
 
+/** Summary of both scans for the configurator and checkout. */
 export function FitNotice({ fit }: { fit: FitCheck }) {
   return (
     <div className="card surface stack">

@@ -1,3 +1,5 @@
+// SoleMate service worker: makes the app shell installable and fast to reopen.
+// API calls and mesh downloads are never cached (measurements must always be live).
 const VERSION = 'solemate-v1';
 const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png'];
 
@@ -18,10 +20,12 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
+  // Page navigations: network first, fall back to the cached shell when offline.
   if (req.mode === 'navigate') {
     event.respondWith(fetch(req).catch(() => caches.match('/')));
     return;
   }
+  // Hashed build assets and icons: cache first.
   event.respondWith(
     caches.match(req).then((hit) => hit || fetch(req).then((res) => {
       if (res.ok) {

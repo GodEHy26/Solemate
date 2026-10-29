@@ -1,4 +1,4 @@
-
+"""Shared helpers: build a priced order through the API."""
 from __future__ import annotations
 
 import io

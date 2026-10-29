@@ -1,8 +1,15 @@
+// Pure state for the Face-ID style capture ring. No DOM, so it is unit-testable.
+//
+// The ring is split into N sectors (15° each by default). As the phone orbits
+// the foot, the device yaw is mapped to a sector; when the user holds steady
+// inside an uncovered sector a frame is captured and the sector lights up.
+// Reconstruction is allowed once coverage passes the threshold with no large gap.
+
 export interface RingState {
   sectorDeg: number;
   sectorCount: number;
   covered: boolean[];
-  yawOffset: number | null;
+  yawOffset: number | null; // device yaw at the moment the sweep started
   lastCaptureAt: number | null;
 }
 
@@ -29,7 +36,11 @@ export function sectorOf(yawDeg: number, sectorDeg: number): number {
   return Math.floor(normalizeDeg(yawDeg) / (360 / count)) % count;
 }
 
-
+/**
+ * Relative yaw (0 at the start of the sweep), counter-clockwise seen from above, matching the
+ * server's camera model. `deviceYaw` is a compass heading, which grows clockwise; as the phone
+ * circles the foot counter-clockwise while pointing at it, its heading falls. Hence offset - heading.
+ */
 export function relativeYaw(ring: RingState, deviceYaw: number): number | null {
   if (ring.yawOffset === null) return null;
   return normalizeDeg(ring.yawOffset - deviceYaw);
@@ -53,6 +64,7 @@ export function missingSectors(ring: RingState): number[] {
   return ring.covered.map((c, i) => (c ? -1 : i)).filter((i) => i >= 0);
 }
 
+/** Largest run of uncovered sectors, in degrees (wrapping around 360). */
 export function largestGapDeg(ring: RingState): number {
   const n = ring.sectorCount;
   if (ring.covered.every((c) => !c)) return 360;
@@ -71,6 +83,7 @@ export function isComplete(ring: RingState, minCoverage = MIN_COVERAGE, maxGapDe
   return coverageFraction(ring) >= minCoverage && largestGapDeg(ring) <= maxGapDeg;
 }
 
+/** The next uncovered sector going clockwise from the current one (for the "move this way" hint). */
 export function nextTargetSector(ring: RingState, currentSector: number | null): number | null {
   const n = ring.sectorCount;
   const start = currentSector ?? 0;
@@ -81,7 +94,10 @@ export function nextTargetSector(ring: RingState, currentSector: number | null):
   return null;
 }
 
-
+/**
+ * Decide whether to grab a frame right now.
+ * `stability` is the recent yaw jitter in degrees (lower = steadier).
+ */
 export function shouldCapture(
   ring: RingState,
   deviceYaw: number | null,
@@ -99,6 +115,7 @@ export function shouldCapture(
   return { capture: true, sector, reason: 'ok' };
 }
 
+/** Jitter estimate from a short history of yaw samples (degrees). */
 export function yawJitter(samples: number[]): number {
   if (samples.length < 2) return 0;
   let maxDiff = 0;
@@ -109,6 +126,7 @@ export function yawJitter(samples: number[]): number {
   return maxDiff;
 }
 
+/** Manual mode (no motion sensors): each tap covers the next sector in order. */
 export function manualAdvance(ring: RingState, now: number): { ring: RingState; sector: number | null } {
   const sector = nextTargetSector(ring, null);
   if (sector === null) return { ring, sector: null };

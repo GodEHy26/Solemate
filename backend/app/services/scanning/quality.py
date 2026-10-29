@@ -1,13 +1,13 @@
+"""Scan quality checks.
 
+Each check turns a measurable symptom into a ``ScanWarning`` with a plain-language message and a
+fix. Severity ``block`` means we will not show a size or take an order from this scan; ``warn``
+means we show a size range instead of one size and the customer must acknowledge it to order.
 
-
-
-
-
-
-
-
-
+Thresholds live in ``THRESHOLDS`` and are documented in docs/SCAN_PIPELINE.md ("Warnings").
+They were tuned on synthetic scans so that a clean capture raises nothing; re-tune them on real
+scans before relying on them.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
@@ -18,17 +18,17 @@ BLOCK = "block"
 WARN = "warn"
 
 THRESHOLDS = {
-
+    # incomplete orbit: the client's own standard (the server's hard floor is 50 % / 120 deg)
     "min_coverage": 0.75,
     "max_gap_deg": 60.0,
-
-    "fallback_fraction": 0.25,
-    "size_jump_ratio": 1.5,
-    "size_jump_min_count": 2,
+    # confusing background
+    "fallback_fraction": 0.25,     # share of orbit frames that needed saturation/GrabCut or were rejected
+    "size_jump_ratio": 1.5,        # outline area change between neighbouring frames (clean scans: <= 1.15)
+    "size_jump_min_count": 2,      # one bad frame creates two jumps (both of its neighbours)
     "size_jump_neighbour_deg": 40.0,
-
+    # measurements disagree: paper-photo width vs 3D-model width, beyond one voxel of quantisation
     "width_disagreement": 0.03,
-
+    # left vs right foot length
     "left_right_mm": 8.0,
 }
 
@@ -36,18 +36,18 @@ THRESHOLDS = {
 @dataclass
 class ScanWarning:
     code: str
-    severity: str
+    severity: str  # "block" | "warn"
     message: str
     fix: str
     details: dict = field(default_factory=dict)
-    side: str | None = None
+    side: str | None = None  # "left" | "right" | "both" when reported for a pair
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict | str) -> "ScanWarning":
-        if isinstance(d, str):
+        if isinstance(d, str):  # profiles stored before structured warnings existed
             return cls("legacy", WARN, d, "If this looks wrong, rescan.")
         return cls(**{k: d.get(k) for k in ("code", "severity", "message", "fix", "side")}, details=d.get("details") or {})
 
@@ -55,7 +55,7 @@ class ScanWarning:
 @dataclass
 class FrameStat:
     yaw_deg: float
-    method: str
+    method: str          # otsu | saturation | grabcut | none
     area_fraction: float
     usable: bool
 
@@ -68,10 +68,10 @@ def confidence(warnings: list[ScanWarning]) -> str:
     return "high"
 
 
-
-
-
-
+# ---------------------------------------------------------------------------
+# Side naming. Yaw 0 = camera in front of the toes, increasing counter-clockwise seen from above,
+# so yaw 90 is on the foot's left (the person's left when standing on it).
+# ---------------------------------------------------------------------------
 def side_of(yaw_deg: float) -> str:
     y = yaw_deg % 360.0
     if y < 45 or y >= 315:
@@ -95,9 +95,9 @@ def largest_gap_center(yaws_deg: list[float]) -> float:
     return center
 
 
-
-
-
+# ---------------------------------------------------------------------------
+# Checks
+# ---------------------------------------------------------------------------
 def check_orbit(yaws_deg: list[float], sector_deg: float) -> list[ScanWarning]:
     frac = coverage_fraction(yaws_deg, sector_deg)
     gap = largest_gap_deg(yaws_deg)
@@ -160,12 +160,12 @@ def check_background(frames: list[FrameStat]) -> list[ScanWarning]:
 
 
 def check_agreement(paper_width_mm: float | None, model_width_mm: float, voxel_mm: float) -> list[ScanWarning]:
+    """Compare two independent widths: the paper photo vs the 3D model.
 
-
-
-
-
-
+    The model is scaled so its *length* equals the paper length, so length cannot disagree by
+    construction. Width is measured independently in each, which makes it the real cross-check.
+    The model width is only known to within one voxel, so it is treated as an interval.
+    """
     if not paper_width_mm:
         return []
     lo, hi = model_width_mm - voxel_mm, model_width_mm

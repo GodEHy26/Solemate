@@ -1,11 +1,11 @@
+"""Foot silhouette extraction for orbit frames.
 
-
-
-
-
-
-
-
+Successor to the IA's ``ImageProcessor``: still a classical pipeline (threshold,
+morphology, largest component) but with automatic polarity detection, a
+saturation-based fallback for low-contrast floors and an optional GrabCut
+refinement. A learned segmenter can be dropped in behind the same function
+signature later.
+"""
 from __future__ import annotations
 
 import cv2
@@ -40,7 +40,7 @@ def _largest_component_near_center(mask: np.ndarray) -> np.ndarray:
     for i in range(1, n):
         area = float(stats[i, cv2.CC_STAT_AREA])
         cx, cy = centroids[i]
-        dist = float(np.hypot((cx - w / 2) / w, (cy - h / 2) / h))
+        dist = float(np.hypot((cx - w / 2) / w, (cy - h / 2) / h))  # 0 (centre) .. ~0.7 (corner)
         score = area * max(0.1, 1.0 - 1.2 * dist)
         if score > best_score:
             best, best_score = i, score
@@ -59,7 +59,7 @@ def _otsu_mask(channel: np.ndarray) -> np.ndarray:
     blur = cv2.GaussianBlur(channel, (7, 7), 0)
     _, th = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     mask = th > 0
-
+    # The subject is centred and the frame border is background: flip polarity if needed.
     border = np.concatenate([mask[0, :], mask[-1, :], mask[:, 0], mask[:, -1]])
     if border.mean() > 0.5:
         mask = ~mask
@@ -95,13 +95,13 @@ def is_plausible(mask: np.ndarray, lo: float = 0.02, hi: float = 0.70) -> bool:
 
 
 def segment(image_bgr: np.ndarray, method: str = "auto") -> tuple[np.ndarray, str]:
+    """Return ``(mask, method_used)``; mask is boolean (True = foot) the same size as the image.
 
-
-
-
-
-
-
+    ``method``: ``"otsu"`` (luminance), ``"saturation"``, ``"grabcut"`` or ``"auto"``, which tries
+    them in that order until the result looks plausible. ``method_used`` is ``"none"`` when auto mode
+    found no plausible silhouette at all. The quality checks use it: needing a fallback on many
+    frames is a sign the floor is confusing the scan.
+    """
     if image_bgr is None or image_bgr.size == 0:
         raise ValueError("empty image")
     gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
@@ -122,10 +122,10 @@ def segment(image_bgr: np.ndarray, method: str = "auto") -> tuple[np.ndarray, st
         if is_plausible(m):
             return m, name
         candidates.append(m)
-
+    # Nothing looked right: return the candidate closest to a typical foot area.
     return min(candidates, key=lambda c: abs(silhouette_area_fraction(c) - 0.2)), "none"
 
 
 def extract_silhouette(image_bgr: np.ndarray, method: str = "auto") -> np.ndarray:
-
+    """Mask only (see ``segment``)."""
     return segment(image_bgr, method)[0]

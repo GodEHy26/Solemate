@@ -1,4 +1,4 @@
-
+"""Privacy promises enforced in code: purge abandoned data, delete on request, protect open preorders."""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -27,7 +27,7 @@ def test_purge_removes_abandoned_scans_and_unpaid_orders_but_keeps_the_rest(clie
     stale_dir = get_settings().scans_dir / stale
     assert stale_dir.exists()
     _age(ScanSession, stale, get_settings().stale_session_hours + 1, "updated_at")
-    _age(ScanSession, done_session, 24 * 30, "updated_at")
+    _age(ScanSession, done_session, 24 * 30, "updated_at")        # old but complete: must survive
 
     left, right = make_profile(client, "left"), make_profile(client, "right")
     old_unpaid = client.post("/api/orders", json=order_body(client, left, right)).json()["id"]
@@ -70,7 +70,7 @@ def test_additive_migration_adds_missing_order_columns(tmp_path):
     from app.database import _add_missing_columns
 
     engine = create_engine(f"sqlite:///{tmp_path/'old.db'}")
-    with engine.begin() as c:
+    with engine.begin() as c:   # an "old" orders table from before preorders existed
         c.execute(text("CREATE TABLE orders (id VARCHAR PRIMARY KEY, created_at DATETIME, status VARCHAR, customer_name VARCHAR, "
                        "email VARCHAR, shipping_json VARCHAR, items_json VARCHAR, currency VARCHAR, subtotal_cents INTEGER, total_cents INTEGER, notes VARCHAR)"))
         c.execute(text("INSERT INTO orders (id, status, customer_name, email) VALUES ('o1', 'pending_payment', 'A', 'a@b.c')"))

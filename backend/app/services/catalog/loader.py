@@ -1,4 +1,4 @@
-
+"""Load the JSON catalog (shoe models + component options)."""
 from __future__ import annotations
 
 import json
@@ -33,7 +33,7 @@ def option_lookup() -> dict[str, dict[str, dict]]:
 
 
 def allowed_option_ids(shoe: dict, component_id: str) -> list[str]:
-
+    """Option ids a shoe model permits for a component ('*' means all)."""
     allowed = shoe.get("allowed_options", {}).get(component_id, "*")
     all_ids = [o["id"] for o in components_by_id()[component_id]["options"]]
     if allowed == "*":
@@ -42,7 +42,7 @@ def allowed_option_ids(shoe: dict, component_id: str) -> list[str]:
 
 
 def shoe_with_options(shoe: dict) -> dict:
-
+    """Shoe plus the fully expanded component/option lists it allows."""
     comps = []
     lookup = option_lookup()
     for comp in load_components()["components"]:

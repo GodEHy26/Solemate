@@ -49,6 +49,7 @@ export function ScanWizard() {
   const cameraActive = step === 'topdown' || step === 'orbit';
   const insecure = typeof window !== 'undefined' && !window.isSecureContext;
 
+  // Keep the screen awake while the camera is in use.
   useEffect(() => {
     if (!(step === 'topdown' || step === 'orbit')) return;
     type WakeNav = Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } };
@@ -111,6 +112,7 @@ export function ScanWizard() {
 
   const skipTopdown = () => setStep('orbit');
 
+  // Auto-capture loop driven by device orientation.
   const currentSector = useMemo(() => {
     if (orientation.yaw === null) return null;
     const rel = relativeYaw(ring, orientation.yaw);
@@ -356,6 +358,7 @@ function hint(target: number | null, current: number | null, ring: RingState): s
   if (target === null || current === null) return 'Keep the foot centred and move around it.';
   const diff = ((target - current) % ring.sectorCount + ring.sectorCount) % ring.sectorCount;
   if (diff === 0) return 'Hold still…';
+  // Sectors grow counter-clockwise seen from above (see relativeYaw).
   return diff <= ring.sectorCount / 2
     ? `Move counter-clockwise about ${diff * ring.sectorDeg}°.`
     : `Move clockwise about ${(ring.sectorCount - diff) * ring.sectorDeg}°.`;

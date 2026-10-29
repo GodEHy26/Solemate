@@ -1,4 +1,4 @@
-
+"""Database engine and session helpers (SQLModel on top of SQLAlchemy)."""
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -18,7 +18,7 @@ def get_engine() -> Engine:
 
 
 def _add_missing_columns(engine: Engine) -> None:
-
+    """Additive migration: `create_all` never alters existing tables, so add new columns by hand."""
     from sqlalchemy import inspect, text
 
     insp = inspect(engine)

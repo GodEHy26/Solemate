@@ -27,7 +27,7 @@ def test_grading_moves_length_a_third_inch_per_size():
 def test_last_spec_respects_family_and_allowances():
     spec = build_last_spec(_foot(), family="run")
     assert spec["base_last"]["family"] == "run"
-    assert spec["target_mm"]["length_mm"] == 275.0
+    assert spec["target_mm"]["length_mm"] == 275.0  # 265 + 10 mm toe room
     assert spec["graded_last_mm"]["length_mm"] + spec["adjustments_mm"]["length_mm"] == spec["target_mm"]["length_mm"]
     assert spec["graded_size_us"] >= 9.5
     wide = build_last_spec(_foot(ball=112.0), family="run")

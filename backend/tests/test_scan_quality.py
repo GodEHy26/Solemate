@@ -1,4 +1,4 @@
-
+"""Scan quality warnings: each check fires on its symptom, and a clean scan raises nothing."""
 from __future__ import annotations
 
 import io
@@ -19,7 +19,7 @@ from tests.synthetic_scenarios import (
 )
 
 
-
+# ============================================================ unit: individual checks
 def test_side_names_follow_the_yaw_convention():
     assert side_of(0) == "toe end" and side_of(350) == "toe end"
     assert side_of(90) == "left side" and side_of(180) == "heel end" and side_of(270) == "right side"
@@ -28,10 +28,10 @@ def test_side_names_follow_the_yaw_convention():
 
 @pytest.mark.parametrize("yaws,fires", [
     (full_ring(15), False),
-    (full_ring(20), False),
-    (ring_with_gap(150, 240), True),
-    (ring_with_gap(150, 195), False),
-    (full_ring(30), True),
+    (full_ring(20), False),                     # 18 frames, every 20 deg: all sectors-ish, small gaps
+    (ring_with_gap(150, 240), True),            # 105 deg gap
+    (ring_with_gap(150, 195), False),           # 60 deg gap is the limit, 75 % coverage
+    (full_ring(30), True),                      # 12 frames: 50 % coverage
 ])
 def test_orbit_thresholds(yaws, fires):
     w = check_orbit(yaws, 15.0)
@@ -54,25 +54,25 @@ def _frames(areas, methods=None):
 
 
 def test_background_quiet_on_smooth_outlines():
-    smooth = [0.10 + 0.03 * abs((i % 12) - 6) / 6 for i in range(24)]
+    smooth = [0.10 + 0.03 * abs((i % 12) - 6) / 6 for i in range(24)]   # natural size change around the ring
     assert check_background(_frames(smooth)) == []
     one_fallback = ["otsu"] * 23 + ["grabcut"]
-    assert check_background(_frames(smooth, one_fallback)) == []
+    assert check_background(_frames(smooth, one_fallback)) == []          # a single fallback is tolerated
 
 
 def test_background_fires_on_fallbacks_or_size_jumps():
     flat = [0.1] * 24
-    methods = ["saturation"] * 6 + ["otsu"] * 18
+    methods = ["saturation"] * 6 + ["otsu"] * 18                           # 25 % fallbacks
     assert check_background(_frames(flat, methods))[0].code == "confusing_background"
-    spiky = flat.copy(); spiky[5] = 0.2
+    spiky = flat.copy(); spiky[5] = 0.2                                    # one frame doubles: two jumps
     w = check_background(_frames(spiky))
     assert w and w[0].details["size_jumps"] == 2
 
 
 def test_agreement_allows_one_voxel_then_three_percent():
     assert check_agreement(None, 95.0, 2.0) == []
-    assert check_agreement(94.0, 95.0, 2.0) == []
-    assert check_agreement(95.0 * 1.029, 95.0, 2.0) == []
+    assert check_agreement(94.0, 95.0, 2.0) == []                          # inside the voxel interval
+    assert check_agreement(95.0 * 1.029, 95.0, 2.0) == []                  # just under 3 % above
     w = check_agreement(95.0 * 1.04, 95.0, 2.0)
     assert w and w[0].code == "measurements_disagree" and w[0].severity == WARN
 
@@ -89,7 +89,7 @@ def test_confidence_levels():
     assert confidence(check_scale("assumed") + check_left_right(250, 270)) == "low"
 
 
-
+# ============================================================ unit: size output
 def test_size_single_range_none():
     single = size_summary(265.0, 100.0, [])
     assert single["mode"] == "single"
@@ -115,7 +115,7 @@ def test_pair_uses_longer_foot_and_tags_sides():
     assert out["size"]["sizes"]["us_men"] == size_summary(266.0, 101.0, [ScanWarning("x", WARN, "m", "f")])["sizes"]["us_men"]
 
 
-
+# ============================================================ end to end: synthetic scans through the API
 def _jpeg(img) -> bytes:
     ok, buf = cv2.imencode(".jpg", img)
     assert ok
@@ -185,7 +185,7 @@ def test_patterned_floor_warns_even_when_the_scan_fails(client, tmp_path):
     state = _scan(client, tmp_path, full_ring(), floor="blotches")
     warnings = state["profile"]["warnings"] if state["profile"] else state["warnings"]
     assert "confusing_background" in _codes(warnings)
-    if state["status"] == "failed":
+    if state["status"] == "failed":                 # the failure must explain itself
         assert state["warnings"][0]["fix"] == "Retake on a plain floor that contrasts with your skin."
 
 
@@ -196,7 +196,7 @@ def test_paper_and_model_disagree(client, tmp_path):
     assert p["warnings"][0]["details"]["difference_pct"] > 3
 
 
-
+# ============================================================ pair check + ordering
 def _mesh_profile(client, side: str, length_mm: float) -> str:
     mesh = trimesh.creation.icosphere(subdivisions=3)
     mesh.apply_scale([length_mm / 2, 48.0, 40.0])
@@ -229,18 +229,18 @@ def _order(client, left, right, ack=False):
 
 def test_orders_respect_warnings(client, tmp_path):
     a, far = _mesh_profile(client, "left", 260), _mesh_profile(client, "right", 275)
-    r = _order(client, a, far)
+    r = _order(client, a, far)                                        # warn, not acknowledged
     assert r.status_code == 422 and "less accurate" in r.text
-    r = _order(client, a, far, ack=True)
+    r = _order(client, a, far, ack=True)                              # warn, acknowledged
     assert r.status_code == 201
     item = r.json()["items"][0]
     assert item["scan_confidence"] == "medium" and item["scan_warning_codes"] == ["left_right_mismatch"]
     assert item["scan_warnings_acknowledged"] is True
 
     blocked = _scan(client, tmp_path, full_ring(), top="no-paper", side="right")["profile_id"]
-    r = _order(client, a, blocked, ack=True)
+    r = _order(client, a, blocked, ack=True)                          # block: acknowledgement doesn't help
     assert r.status_code == 422 and "top-down photo" in r.text
 
     clean_right = _mesh_profile(client, "right", 262)
-    r = _order(client, a, clean_right)
+    r = _order(client, a, clean_right)                                # no warnings: no tick needed
     assert r.status_code == 201 and r.json()["items"][0]["scan_warning_codes"] == []

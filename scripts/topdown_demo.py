@@ -1,11 +1,11 @@
+"""Run Sole-Mate's top-down paper measurement on one photo and save every stage as an image.
 
+Usage (from the repo root):
+    python scripts/topdown_demo.py path/to/photo.jpg [--paper A4] [--out demo_out]
 
-
-
-
-
-
-
+Writes 1_input.jpg, 2_paper_detected.jpg, 3_rectified.jpg, 4_foot_mask.jpg, 5_result.jpg and
+contour_mm.csv to the output folder, and prints the measurements.
+"""
 from __future__ import annotations
 
 import argparse

@@ -1,1 +1,1 @@
-
+"""SoleMate API package."""

@@ -1,5 +1,6 @@
 import { useSiteConfig } from '../../lib/hooks/useSiteConfig';
 
+/** Always-visible reminder that nothing is in stock: every pair is a made-to-order preorder. */
 export function PreorderBanner() {
   const cfg = useSiteConfig();
   return (

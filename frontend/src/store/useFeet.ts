@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Side } from '../lib/types';
 
+/** The customer's current foot profiles (one per side), kept in local storage until accounts exist. */
 interface FeetState {
   profiles: Partial<Record<Side, string>>;
   setProfile: (side: Side, profileId: string) => void;

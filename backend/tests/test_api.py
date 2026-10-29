@@ -1,4 +1,4 @@
-
+"""End-to-end API tests using synthetic renders (no real photos needed)."""
 import io
 from pathlib import Path
 
@@ -8,7 +8,7 @@ import pytest
 
 from tests.synthetic import ellipsoid_surface, paper_scene, write_orbit_frames
 
-
+# Ellipsoid "foot" in reconstruction units (radius-1 orbit): 0.56 long, 0.20 wide, 0.16 tall, like a real foot ~45 cm from the phone.
 RADII = (0.28, 0.10, 0.08)
 CENTER = (0.0, 0.0, 0.08)
 
@@ -67,7 +67,7 @@ def test_frame_validation(client):
     )
     assert r.status_code == 422
     r = client.post(f"/api/scans/{scan['id']}/reconstruct")
-    assert r.status_code == 422
+    assert r.status_code == 422  # not enough frames
     assert client.get("/api/scans/does-not-exist").status_code == 404
 
 
@@ -85,7 +85,7 @@ def test_full_scan_flow_with_paper_scale(client, tmp_path):
     profile = client.get(f"/api/profiles/{state['profile_id']}").json()
     m = profile["measurements"]
     assert profile["scale_method"] == "paper"
-
+    # Scaled so the hull length equals the paper-measured 260 mm; width follows the ellipsoid proportions.
     assert m["length_mm"] == pytest.approx(260.0, rel=0.03)
     assert m["ball_width_mm"] == pytest.approx(100.0, rel=0.20)
     assert m["instep_height_mm"] > 50
@@ -103,7 +103,7 @@ def test_full_scan_flow_with_paper_scale(client, tmp_path):
     assert spec["base_last"]["family"] == "court"
     assert spec["target_mm"]["length_mm"] == pytest.approx(m["length_mm"] + 10, abs=0.2)
 
-
+    # frames can no longer be added once processed
     r = client.post(
         f"/api/scans/{scan['id']}/frames",
         files={"image": ("x.jpg", _jpeg_bytes(np.zeros((10, 10, 3), np.uint8)), "image/jpeg")},
@@ -151,8 +151,8 @@ def test_photos_are_deleted_after_reconstruction(client, tmp_path):
     assert any(frames_dir.iterdir())
     assert client.post(f"/api/scans/{scan['id']}/reconstruct").status_code == 202
     assert client.get(f"/api/scans/{scan['id']}").json()["status"] == "complete"
-    assert not frames_dir.exists()
-    assert (get_settings().scans_dir / scan["id"] / "foot.glb").exists()
+    assert not frames_dir.exists()                       # raw photos gone
+    assert (get_settings().scans_dir / scan["id"] / "foot.glb").exists()   # model kept
 
 
 def test_site_config_is_preorder(client):

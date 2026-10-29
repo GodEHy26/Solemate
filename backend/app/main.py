@@ -1,4 +1,7 @@
+"""SoleMate API entry point.
 
+Run locally with ``uvicorn app.main:app --reload`` from the ``backend`` directory.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -21,7 +24,7 @@ def _purge_once() -> None:
     try:
         with Session(get_engine()) as db:
             purge_stale(db)
-    except Exception:
+    except Exception:  # never let housekeeping take the API down
         log.exception("retention purge failed")
 
 

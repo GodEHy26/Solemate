@@ -1,10 +1,10 @@
+"""Synthetic foot renders shared by the tests.
 
-
-
-
-
-
-
+A foot stand-in is an ellipsoid resting on the floor. We render its silhouette
+with the same camera model the reconstructor uses, so the tests check the
+pipeline is self-consistent (carve -> mesh -> measurements) without needing
+real photos.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -16,7 +16,7 @@ from app.services.scanning.cameras import Camera, orbit_camera
 
 
 def ellipsoid_surface(center, radii, n: int = 6000) -> np.ndarray:
-
+    """Points on an ellipsoid surface (Fibonacci sphere, scaled)."""
     i = np.arange(n) + 0.5
     phi = np.arccos(1 - 2 * i / n)
     theta = np.pi * (1 + 5**0.5) * i
@@ -52,7 +52,7 @@ def write_orbit_frames(
     height: int = 360,
     hfov: float = 65.0,
 ) -> list[dict]:
-
+    """Photo-like frames: dark foot on a light floor, saved as JPEG."""
     out_dir.mkdir(parents=True, exist_ok=True)
     yaws, cams = orbit_rig(n_views, pitch_deg, radius, target, width, height, hfov)
     frames = []
@@ -75,13 +75,13 @@ def paper_scene(
     size=(900, 700),
     rotation_deg: float = 12.0,
 ) -> np.ndarray:
-
+    """Top-down photo stand-in: dark floor, white sheet, dark ellipse (foot) on it."""
     from app.services.scanning.scale import PAPER_SIZES_MM
 
     w, h = size
     short_mm, long_mm = PAPER_SIZES_MM[paper]
     img = np.full((h, w, 3), 75, np.uint8)
-
+    # paper corners in mm (portrait) -> image via a rotation + scale (a mild perspective-free placement)
     px_per_mm = 1.6
     cx, cy = w / 2, h / 2
     theta = np.radians(rotation_deg)

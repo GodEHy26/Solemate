@@ -1,4 +1,4 @@
-
+"""Voxel grid -> triangle mesh (marching cubes) and mesh export."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,12 +13,12 @@ SUPPORTED_EXPORTS = (".glb", ".obj", ".ply", ".stl")
 
 
 def grid_to_mesh(grid: VoxelGrid, smooth_iterations: int = 10) -> trimesh.Trimesh:
-
+    """Extract the iso-surface of the occupancy grid as a watertight mesh."""
     if not grid.occupancy.any():
         raise ReconstructionError("cannot mesh an empty voxel grid")
-    volume = np.pad(grid.occupancy.astype(np.float32), 1)
+    volume = np.pad(grid.occupancy.astype(np.float32), 1)  # zero border closes the surface
     verts, faces, _normals, _values = measure.marching_cubes(volume, level=0.5, spacing=tuple(grid.spacing))
-    verts = verts + (grid.origin - grid.spacing)
+    verts = verts + (grid.origin - grid.spacing)  # undo padding offset
     mesh = trimesh.Trimesh(vertices=verts, faces=faces, process=True)
     if smooth_iterations > 0 and len(mesh.vertices) > 0:
         trimesh.smoothing.filter_taubin(mesh, iterations=smooth_iterations)
@@ -27,7 +27,7 @@ def grid_to_mesh(grid: VoxelGrid, smooth_iterations: int = 10) -> trimesh.Trimes
 
 
 def load_mesh(path: str | Path, units: str = "mm") -> trimesh.Trimesh:
-
+    """Load a mesh produced elsewhere (for example an ARKit/LiDAR app) and convert to mm."""
     loaded = trimesh.load(str(path), force="mesh")
     if not isinstance(loaded, trimesh.Trimesh):
         raise ReconstructionError("file did not contain a triangle mesh")
@@ -49,7 +49,7 @@ def export_mesh(mesh: trimesh.Trimesh, path: str | Path) -> Path:
 
 
 def mesh_to_grid(mesh: trimesh.Trimesh, resolution: int = 128) -> VoxelGrid:
-
+    """Voxelise a closed mesh (used for uploaded meshes so measurements share one code path)."""
     bounds = mesh.bounds
     extent = bounds[1] - bounds[0]
     pitch = float(extent.max()) / float(resolution)

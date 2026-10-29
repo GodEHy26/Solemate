@@ -47,7 +47,8 @@ export function CheckoutPage() {
           right_profile_id: feet.right ?? null,
         })),
       });
-      try { sessionStorage.setItem('solemate-pending-order', order.id); } catch { /* storage unavailable */ }
+      // Remember which order is being paid so a cancelled payment does not lose it.
+      try { sessionStorage.setItem('solemate-pending-order', order.id); } catch { /* private mode */ }
       const { url } = await api.startCheckout(order.id);
       window.location.assign(url); // hosted Stripe page; it returns to /orders/<id>?paid=1
     } catch (err) {

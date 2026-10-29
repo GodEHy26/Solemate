@@ -1,4 +1,8 @@
+"""Preorders: server-side pricing, consent record, Stripe Checkout and payment confirmation.
 
+Lifecycle: ``awaiting_payment`` -> ``preordered`` (paid). Anything the customer never pays for is
+deleted by the retention job after ``unpaid_order_hours``.
+"""
 from __future__ import annotations
 
 import json
@@ -53,11 +57,11 @@ def _load(db: Session, order_id: str) -> Order:
 
 
 def apply_paid_session(db: Session, order: Order, session: dict) -> bool:
+    """Mark an order as paid from a Stripe Checkout session. Idempotent; returns True if it changed.
 
-
-
-
-
+    The amount and currency Stripe actually charged must equal what we priced, otherwise the order
+    is parked as ``needs_review`` instead of silently accepted.
+    """
     if session.get("payment_status") != "paid" or order.status == "preordered":
         return False
     if order.status not in PAYABLE + ("needs_review",):
@@ -134,7 +138,7 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_session)) -> Or
         items_json=json.dumps(items),
         currency=currency,
         subtotal_cents=subtotal,
-        total_cents=subtotal,
+        total_cents=subtotal,  # shipping and tax are not charged yet; see docs/PAYMENTS.md
         notes=payload.notes,
         preorder=True,
         terms_version=settings.terms_version,
@@ -153,7 +157,7 @@ def get_order(order_id: str, db: Session = Depends(get_session)) -> OrderOut:
 
 @router.post("/{order_id}/checkout")
 def start_checkout(order_id: str, db: Session = Depends(get_session)) -> dict:
-
+    """Create a Stripe Checkout session for the order and return the hosted payment page URL."""
     order = _load(db, order_id)
     if order.status not in PAYABLE:
         raise HTTPException(409, f"order is {order.status}; it cannot be paid again")
@@ -172,7 +176,7 @@ def start_checkout(order_id: str, db: Session = Depends(get_session)) -> dict:
 
 @router.post("/{order_id}/confirm", response_model=OrderOut)
 def confirm_payment(order_id: str, db: Session = Depends(get_session)) -> OrderOut:
-
+    """Ask Stripe directly whether this order was paid. Safety net for a slow or missing webhook."""
     order = _load(db, order_id)
     if order.status in PAYABLE and order.checkout_session_id and get_settings().payments_enabled:
         try:

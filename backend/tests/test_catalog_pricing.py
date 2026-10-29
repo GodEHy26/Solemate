@@ -31,9 +31,9 @@ def test_validation_errors():
     result = price_configuration(shoe, {"outsole": "polyurethane", "midsole": "cork_latex", "upper": "engineered_knit"})
     assert not result.valid
     joined = " ".join(result.errors)
-    assert "not offered" in joined
-    assert "Missing selection" in joined
-    assert "flexible platforms" in joined
+    assert "not offered" in joined           # PU outsole not allowed on Court
+    assert "Missing selection" in joined     # lining / insole / laces
+    assert "flexible platforms" in joined    # knit + cork rule
 
 
 def test_scan_requirement_flag():

@@ -1,3 +1,5 @@
+// Template preorder terms. The refund and delay rules below are defaults chosen to be fair to
+// customers; they are business decisions, so confirm them (and have the page reviewed) before launch.
 import { Link } from 'react-router-dom';
 import { LegalLayout, useOperator } from './LegalLayout';
 

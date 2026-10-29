@@ -1,9 +1,9 @@
+"""Stripe Checkout (hosted payment page) wrapper.
 
-
-
-
-
-
+We never touch card numbers: the customer pays on a Stripe-hosted page and Stripe tells us the
+result (return redirect plus a signed webhook). Only this module imports ``stripe`` so the rest of
+the app, and the tests, can swap it out.
+"""
 from __future__ import annotations
 
 import logging
@@ -37,7 +37,7 @@ def _describe(selections: dict[str, str]) -> str:
 
 
 def build_session_params(order: Order, items: list[dict], currency: str) -> dict[str, Any]:
-
+    """Pure function (unit tested): the exact parameters sent to Stripe."""
     s = get_settings()
     base = s.public_url.rstrip("/")
     line_items = [
@@ -96,7 +96,7 @@ def retrieve_session(session_id: str) -> dict[str, Any]:
 
 
 def construct_event(payload: bytes, signature: str | None) -> dict[str, Any]:
-
+    """Verify the Stripe-Signature header and return the event as a plain dict. Raises on a bad signature."""
     secret = get_settings().stripe_webhook_secret
     if not secret:
         raise PaymentsNotConfigured("SOLEMATE_STRIPE_WEBHOOK_SECRET is not set.")

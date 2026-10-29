@@ -10,6 +10,7 @@ const isStandalone = () =>
   (navigator as Navigator & { standalone?: boolean }).standalone === true;
 const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 
+/** "Add to Home Screen" nudge: native prompt on Android/Chrome, instructions on iOS. */
 export function InstallPrompt() {
   const [event, setEvent] = useState<InstallEvent | null>(null);
   const [dismissed, setDismissed] = useState(() => {
@@ -33,7 +34,9 @@ export function InstallPrompt() {
     setDismissed(true);
     try {
       localStorage.setItem('solemate-install-dismissed', '1');
-    } catch { /* storage unavailable */ }
+    } catch {
+      /* private mode */
+    }
   };
 
   if (dismissed || isStandalone()) return null;

@@ -30,6 +30,7 @@ export function ConfiguratorPage() {
     }).catch((e: Error) => setError(e.message));
   }, [slug]);
 
+  // Instant local estimate, then the server-validated price (debounced).
   const local = useMemo(() => (shoe ? priceLocally(shoe, selections) : null), [shoe, selections]);
   useEffect(() => {
     if (!shoe) return;

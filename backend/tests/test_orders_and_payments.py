@@ -1,4 +1,4 @@
-
+"""Preorders and Stripe: consent, pricing, checkout params, signed webhooks, confirm fallback."""
 from __future__ import annotations
 
 import hashlib
@@ -53,7 +53,7 @@ def _post_event(client, payload: bytes, signature: str | None):
     return client.post("/api/stripe/webhook", content=payload, headers=headers)
 
 
-
+# ---------------------------------------------------------------- order creation
 def test_order_is_a_preorder_awaiting_payment(client, profiles):
     order = _new_order(client, profiles, quantity=2)
     assert order["status"] == "awaiting_payment"
@@ -76,7 +76,7 @@ def test_both_feet_are_required(client, profiles):
     assert client.post("/api/orders", json=order_body(client, "nope", "nope")).status_code == 422
 
 
-
+# ---------------------------------------------------------------- checkout session parameters
 def test_checkout_params_are_priced_by_the_server_and_labelled_preorder(client, profiles):
     from app.db_models import Order
     from app.database import get_engine
@@ -116,7 +116,7 @@ class _FakeStripe(BaseHTTPRequestHandler):
                      "amount_total": _FakeStripe.amount, "currency": "usd", "payment_intent": "pi_fake",
                      "metadata": {"order_id": _FakeStripe.order_id}})
 
-    def log_message(self, *a):
+    def log_message(self, *a):  # silence
         pass
 
     amount = 0
@@ -145,7 +145,7 @@ def test_checkout_endpoint_talks_to_stripe_sdk_correctly(client, profiles, fake_
     assert form["line_items[0][price_data][unit_amount]"] == [str(order["total_cents"])]
     assert form["metadata[order_id]"] == [order["id"]]
     assert form["customer_email"] == ["test@example.com"]
-    assert client.get(f"/api/orders/{order['id']}").json()["status"] == "awaiting_payment"
+    assert client.get(f"/api/orders/{order['id']}").json()["status"] == "awaiting_payment"  # not paid until Stripe says so
 
 
 def test_confirm_marks_paid_only_when_stripe_says_paid_and_amount_matches(client, profiles, fake_stripe):
@@ -173,13 +173,13 @@ def test_checkout_unavailable_without_keys(client, profiles, monkeypatch):
     assert client.get("/api/config").json()["payments_enabled"] is False
 
 
-
+# ---------------------------------------------------------------- webhook
 def test_webhook_rejects_bad_or_missing_signature(client, profiles):
     order = _new_order(client, profiles)
     payload = _event(order)
     assert _post_event(client, payload, None).status_code == 400
     assert _post_event(client, payload, _sign(payload, "whsec_wrong")).status_code == 400
-    assert _post_event(client, payload, _sign(payload, ts=int(time.time()) - 3600)).status_code == 400
+    assert _post_event(client, payload, _sign(payload, ts=int(time.time()) - 3600)).status_code == 400   # replay window
     assert client.get(f"/api/orders/{order['id']}").json()["status"] == "awaiting_payment"
 
 
@@ -190,7 +190,7 @@ def test_webhook_marks_preorder_paid_and_is_idempotent(client, profiles):
     got = client.get(f"/api/orders/{order['id']}").json()
     assert got["status"] == "preordered" and got["amount_paid_cents"] == order["total_cents"]
     paid_at = got["paid_at"]
-    assert _post_event(client, payload, _sign(payload)).status_code == 200
+    assert _post_event(client, payload, _sign(payload)).status_code == 200      # Stripe retries
     assert client.get(f"/api/orders/{order['id']}").json()["paid_at"] == paid_at
 
 
@@ -219,7 +219,7 @@ def test_webhook_unknown_order_and_failed_payment(client, profiles):
     p = _event(order, etype="checkout.session.async_payment_failed", status="unpaid")
     _post_event(client, p, _sign(p))
     assert client.get(f"/api/orders/{order['id']}").json()["status"] == "payment_failed"
-    r = client.post(f"/api/orders/{order['id']}/checkout")
+    r = client.post(f"/api/orders/{order['id']}/checkout")   # can retry after a failure
     assert r.status_code in (200, 502)
 
 

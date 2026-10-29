@@ -1,4 +1,15 @@
+"""Capture plan for the Face-ID style scan.
 
+The phone orbits the foot while the app records one frame per angular
+*sector*. The same sector model is used by the web client (the progress ring)
+and by the server (coverage validation before reconstruction), so this module
+is the single source of truth for it.
+
+World frame convention (shared with ``cameras.py``):
+  * Z is up, the floor is z = 0, the foot stands at the origin.
+  * Yaw 0 looks at the foot from in front of the toes; yaw increases
+    counter-clockwise when viewed from above.
+"""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -10,7 +21,7 @@ ORBIT_KIND = "orbit"
 @dataclass(frozen=True)
 class CapturePose:
     index: int
-    kind: str
+    kind: str  # "topdown" | "orbit"
     yaw_deg: float
     pitch_deg: float
     instruction: str
@@ -26,7 +37,7 @@ def sector_count(sector_deg: float) -> int:
 
 
 def sector_of(yaw_deg: float, sector_deg: float) -> int:
-
+    """Return the sector index (0..n-1) that contains ``yaw_deg``."""
     n = sector_count(sector_deg)
     return int((yaw_deg % 360.0) // (360.0 / n)) % n
 
@@ -36,7 +47,7 @@ def build_capture_plan(
     pitch_deg: float = 30.0,
     include_topdown: bool = True,
 ) -> list[CapturePose]:
-
+    """Return the ordered list of poses the client should guide the user through."""
     poses: list[CapturePose] = []
     idx = 0
     if include_topdown:
@@ -85,7 +96,7 @@ def missing_sectors(yaws_deg: list[float], sector_deg: float = 15.0) -> list[int
 
 
 def largest_gap_deg(yaws_deg: list[float]) -> float:
-
+    """Largest angular gap between consecutive captured yaws (0 when fully covered)."""
     if not yaws_deg:
         return 360.0
     ys = sorted(y % 360.0 for y in yaws_deg)
@@ -100,7 +111,7 @@ def validate_coverage(
     min_fraction: float = 0.75,
     max_gap_deg: float = 60.0,
 ) -> tuple[bool, list[str]]:
-
+    """Check that an orbit capture is complete enough to reconstruct from."""
     problems: list[str] = []
     frac = coverage_fraction(yaws_deg, sector_deg)
     if frac < min_fraction:

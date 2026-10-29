@@ -1,4 +1,4 @@
-
+"""Synthetic capture scenarios for the quality checks (clean, gaps, no paper, busy floors)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,10 +8,10 @@ import numpy as np
 
 from tests.synthetic import ellipsoid_surface, orbit_rig, paper_scene, render_silhouette
 
-RADII = (0.28, 0.10, 0.08)
+RADII = (0.28, 0.10, 0.08)          # reconstruction units: a foot about 45 cm from the phone
 CENTER = (0.0, 0.0, 0.08)
 FOOT_LENGTH_MM = 260.0
-FOOT_WIDTH_MM = FOOT_LENGTH_MM * RADII[1] / RADII[0]
+FOOT_WIDTH_MM = FOOT_LENGTH_MM * RADII[1] / RADII[0]   # paper photo consistent with the 3D shape
 SKIN = (70, 60, 55)
 
 
@@ -19,7 +19,7 @@ def _floor(kind: str, i: int, h: int, w: int) -> np.ndarray:
     rng = np.random.default_rng(100 + i)
     if kind == "plain":
         return np.full((h, w, 3), 225, np.uint8)
-    if kind == "tiles":
+    if kind == "tiles":  # checkerboard rug with dark tiles; shifts as the camera moves
         s, off = 40, (i * 13) % 40
         yy, xx = np.mgrid[0:h, 0:w]
         img = np.empty((h, w, 3), np.uint8)
@@ -27,7 +27,7 @@ def _floor(kind: str, i: int, h: int, w: int) -> np.ndarray:
         img[light] = (225, 225, 225)
         img[~light] = (80, 70, 65)
         return img
-    if kind == "blotches":
+    if kind == "blotches":  # patterned floor: big patches incl. skin-like and dark tones
         img = np.full((h, w, 3), 200, np.uint8)
         palette = [SKIN, (120, 150, 200), (40, 40, 40), (200, 200, 200), (90, 120, 170)]
         for _ in range(14):
@@ -62,7 +62,7 @@ def full_ring(step: float = 15.0) -> list[float]:
 
 
 def ring_with_gap(gap_from: float, gap_to: float, step: float = 15.0) -> list[float]:
-
+    """Every ``step`` degrees except the half-open range [gap_from, gap_to)."""
     return [y for y in full_ring(step) if not (gap_from <= y < gap_to)]
 
 

@@ -1,4 +1,4 @@
-
+"""Scan sessions: capture plan, frame upload, reconstruction, status."""
 from __future__ import annotations
 
 import json
@@ -56,7 +56,7 @@ def _load(db: Session, scan_id: str) -> ScanSession:
 
 @router.get("/plan")
 def get_plan() -> dict:
-
+    """The capture poses the client guides the user through (single source of truth)."""
     s = get_settings()
     poses = cp.build_capture_plan(s.sector_deg, s.orbit_pitch_deg, include_topdown=True)
     return {
@@ -156,7 +156,7 @@ async def upload_mesh(
     units: str = Form("mm"),
     db: Session = Depends(get_session),
 ) -> ScanOut:
-
+    """Alternative input: a metric mesh from a depth-sensing companion app."""
     session = _load(db, scan_id)
     if session.status not in ("capturing", "failed"):
         raise HTTPException(409, f"session is already {session.status}")

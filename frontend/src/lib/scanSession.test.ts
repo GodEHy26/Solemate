@@ -51,8 +51,10 @@ describe('capture decisions', () => {
     expect(shouldCapture(ring, 90, 20, 1000).reason).toBe('unstable');
     ring = markCovered(ring, 0, 1000);
     expect(shouldCapture(ring, 88, 0, 1100).reason).toBe('covered'); // 2 deg counter-clockwise: still sector 0
+    // heading falls by 20 deg = phone moved 20 deg counter-clockwise = sector 1
     expect(shouldCapture(ring, 70, 0, 1100).reason).toBe('cooldown');
     expect(shouldCapture(ring, 70, 0, 2000)).toMatchObject({ capture: true, sector: 1 });
+    // heading rises = clockwise = the far end of the ring
     expect(shouldCapture(ring, 110, 0, 2000)).toMatchObject({ capture: true, sector: 22 });
   });
 

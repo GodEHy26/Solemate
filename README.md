@@ -112,7 +112,7 @@ Interactive docs: http://localhost:8000/docs
 
 ## How the scan works (short version)
 
-Silhouettes from about 16 to 24 angles carve a voxel volume into the foot's visual hull; the sheet of paper
+Silhouettes from ~16–24 angles carve a voxel volume into the foot's visual hull; the sheet of paper
 in the top-down photo fixes the scale; marching cubes turns the volume into a mesh; the mesh is
 aligned (heel at the origin, toes along +X) and measured at standard last-making stations.
 Details, limitations and the planned upgrades (real camera poses, learned segmentation, sensor
@@ -120,4 +120,4 @@ meshes) are in `docs/SCAN_PIPELINE.md`.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT — see `LICENSE`.

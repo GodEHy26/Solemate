@@ -1,3 +1,5 @@
+// Template privacy policy written to match what the code actually does (see docs/PAYMENTS.md for
+// the checklist). Have it reviewed against the rules where your customers live before launch.
 import { LegalLayout, useOperator } from './LegalLayout';
 
 export function PrivacyPage() {

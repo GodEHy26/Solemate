@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api';
 import type { SiteConfig } from '../types';
 
+// One request per page load, shared by every component.
 let cached: Promise<SiteConfig> | null = null;
 const load = () => (cached ??= api.config().catch((e) => {
   cached = null;

@@ -1,3 +1,5 @@
+// Shapes returned by the SoleMate API (mirrors backend/app/schemas.py).
+
 export type Side = 'left' | 'right';
 
 export interface ScanWarning {

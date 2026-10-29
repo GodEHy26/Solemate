@@ -8,7 +8,7 @@ from app.services.scanning.segmentation import extract_silhouette, is_plausible
 def _scene(fg, bg):
     img = np.full((300, 400, 3), bg, np.uint8)
     cv2.ellipse(img, (200, 160), (90, 50), 20, 0, 360, fg, -1)
-    cv2.circle(img, (20, 20), 6, fg, -1)
+    cv2.circle(img, (20, 20), 6, fg, -1)  # small distractor in the corner
     return img
 
 
@@ -23,7 +23,7 @@ def test_polarity_and_largest_component(fg, bg):
 
 
 def test_auto_falls_back_to_saturation():
-
+    # same luminance, different saturation
     img = np.full((300, 400, 3), (128, 128, 128), np.uint8)
     cv2.ellipse(img, (200, 160), (90, 50), 0, 0, 360, (60, 120, 190), -1)
     mask = extract_silhouette(img, "auto")

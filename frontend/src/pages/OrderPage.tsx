@@ -25,6 +25,8 @@ export function OrderPage() {
   useEffect(() => {
     let alive = true;
     let timer: number | undefined;
+    // After paying, Stripe sends us back here. Ask the server to confirm with Stripe (the webhook
+    // may be a few seconds behind), and retry briefly until the status flips.
     const tick = async () => {
       try {
         const o = returningFromStripe ? await api.confirmOrder(id) : await api.getOrder(id);
@@ -32,7 +34,7 @@ export function OrderPage() {
         setOrder(o);
         if (o.status === 'preordered') {
           clearCart();
-          try { sessionStorage.removeItem('solemate-pending-order'); } catch { /* storage unavailable */ }
+          try { sessionStorage.removeItem('solemate-pending-order'); } catch { /* ignore */ }
           setChecking(false);
         } else if (returningFromStripe && tries.current++ < 10) {
           timer = window.setTimeout(tick, 2000);

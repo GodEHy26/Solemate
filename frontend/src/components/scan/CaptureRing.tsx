@@ -1,3 +1,4 @@
+// Face-ID style progress ring: one arc per sector, filled as the sweep covers it.
 interface Props {
   covered: boolean[];
   current: number | null;

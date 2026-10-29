@@ -1,10 +1,10 @@
+"""Reconstruction strategies that turn captured input into a measured foot.
 
-
-
-
-
-
-
+``VisualHullReconstructor`` is the browser path (photos only).
+``UploadedMeshReconstructor`` accepts a mesh produced by a depth sensor
+(ARKit / ARCore / LiDAR companion app) so both paths end in the same
+``ScanResult`` and share measurements, sizing and last matching.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -25,7 +25,7 @@ from .quality import FrameStat, ScanWarning, check_agreement, check_background, 
 from .segmentation import downscale_for_processing, is_plausible, segment
 from .visual_hull import ReconstructionError, VoxelGrid, carve_adaptive
 
-ANKLE_CUT_RATIO = 0.34
+ANKLE_CUT_RATIO = 0.34  # keep the hull below ~34 % of foot length (just above the ankle bones)
 
 
 @dataclass
@@ -39,17 +39,17 @@ class FrameInput:
 
 @dataclass
 class ScanResult:
-    mesh: trimesh.Trimesh
-    grid: VoxelGrid
+    mesh: trimesh.Trimesh          # canonical pose, millimetres
+    grid: VoxelGrid                # millimetres, raw orientation
     geometry: FootGeometry
-    source: str
-    scale_method: str
-    scale_confidence: str
+    source: str                    # visual_hull | uploaded_mesh
+    scale_method: str              # paper | known_length | assumed | sensor
+    scale_confidence: str          # high | medium | low
     scale_factor: float
     frames_used: int
     topdown: dict | None = None
     warnings: list[ScanWarning] = field(default_factory=list)
-    notes: list[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)    # diagnostics for us, not shown as warnings
     frame_stats: list[FrameStat] = field(default_factory=list)
 
     @property
@@ -62,7 +62,7 @@ class Reconstructor(Protocol):
 
 
 def clip_height(grid: VoxelGrid, z_max: float) -> VoxelGrid:
-
+    """Drop voxels above ``z_max`` (world units of the grid)."""
     z = grid.origin[2] + np.arange(grid.shape[2]) * grid.spacing[2]
     keep = z <= z_max
     occ = grid.occupancy.copy()
@@ -130,8 +130,8 @@ class VisualHullReconstructor:
         try:
             return self._build(frames, topdown, masks, cams, yaws, background, notes, stats, known_length_mm, paper)
         except ReconstructionError as exc:
-
-
+            # A late failure (e.g. the hull collapsed) is usually caused by bad silhouettes:
+            # make sure the customer sees why, not just that it failed.
             if not exc.warnings:
                 exc.warnings = background + check_orbit(yaws, s.sector_deg)
             raise
@@ -142,7 +142,7 @@ class VisualHullReconstructor:
         bounds = np.array([[-0.6 * r, 0.6 * r], [-0.6 * r, 0.6 * r], [0.0, 0.5 * r]])
         grid_units = carve_adaptive(masks, cams, bounds, s.coarse_resolution, s.voxel_resolution)
         unscaled = analyze_foot(grid_units, mesh=None, stations=40)
-        length_units = unscaled.measurements.length_mm
+        length_units = unscaled.measurements.length_mm  # still in reconstruction units here
 
         topdown_info = None
         if topdown:
@@ -156,7 +156,7 @@ class VisualHullReconstructor:
         if topdown_info is not None:
             scale, method, confidence = topdown_info["length_mm"] / length_units, "paper", "high"
         elif known_length_mm:
-
+            # A typed length gives scale but nothing to check it against, so it counts as low.
             scale, method, confidence = float(known_length_mm) / length_units, "known_length", "low"
         else:
             scale, method, confidence = s.default_capture_radius_mm / r, "assumed", "low"
@@ -192,7 +192,7 @@ class VisualHullReconstructor:
 
 
 class UploadedMeshReconstructor:
-
+    """Measure a mesh captured by a depth sensor (already metric)."""
 
     def __init__(self, settings: Settings | None = None):
         self.settings = settings or get_settings()

@@ -1,11 +1,11 @@
+"""Shape-from-silhouette (visual hull) by voxel carving.
 
-
-
-
-
-
-
-
+Every voxel starts occupied. For each calibrated view the voxel centres are
+projected into the image; a voxel that lands on background in any view is
+carved away. What survives is the visual hull: the largest shape consistent
+with all silhouettes. For a convex-ish object like a foot standing on the
+floor it is a good approximation of the true surface.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -17,7 +17,7 @@ from .cameras import Camera
 
 
 class ReconstructionError(RuntimeError):
-
+    """Raised when no plausible shape can be recovered. May carry quality warnings explaining why."""
 
     def __init__(self, message: str, warnings: list | None = None):
         super().__init__(message)
@@ -26,9 +26,9 @@ class ReconstructionError(RuntimeError):
 
 @dataclass
 class VoxelGrid:
-    occupancy: np.ndarray
-    origin: np.ndarray
-    spacing: np.ndarray
+    occupancy: np.ndarray  # bool, shape (nx, ny, nz)
+    origin: np.ndarray     # world position of voxel index (0, 0, 0) centre
+    spacing: np.ndarray    # (3,) voxel edge lengths
 
     @property
     def shape(self) -> tuple[int, int, int]:
@@ -39,7 +39,7 @@ class VoxelGrid:
         return self.origin + idx * self.spacing
 
     def bounds(self) -> np.ndarray:
-
+        """Axis-aligned bounds of occupied voxels, including voxel extent: (3, 2)."""
         pts = self.occupied_points()
         if len(pts) == 0:
             raise ReconstructionError("voxel grid is empty")
@@ -54,12 +54,12 @@ class VoxelGrid:
         return VoxelGrid(self.occupancy.copy(), self.origin * factor, self.spacing * factor)
 
     def transformed(self, R: np.ndarray, offset: np.ndarray) -> np.ndarray:
-
+        """Occupied centres mapped through ``R @ p + offset`` (points only)."""
         return self.occupied_points() @ R.T + offset
 
 
 def make_grid(bounds: np.ndarray, resolution: int) -> tuple[np.ndarray, tuple[int, int, int], np.ndarray, np.ndarray]:
-
+    """Isotropic voxel lattice filling ``bounds`` with ``resolution`` cells on the longest axis."""
     bounds = np.asarray(bounds, dtype=np.float64)
     extent = bounds[:, 1] - bounds[:, 0]
     if np.any(extent <= 0):
@@ -82,13 +82,13 @@ def carve(
     carve_outside_image: bool = False,
     min_observations: int = 1,
 ) -> VoxelGrid:
+    """Carve a voxel grid with the given silhouettes.
 
-
-
-
-
-
-
+    ``masks[i]`` is a boolean (H, W) image where True = foot, matching
+    ``cameras[i]``. Voxels that project outside an image are kept unless
+    ``carve_outside_image`` is set (they are unobserved, not empty), but a
+    voxel seen by fewer than ``min_observations`` views is discarded.
+    """
     if len(masks) != len(cameras):
         raise ValueError("masks and cameras must have the same length")
     if not masks:
@@ -119,7 +119,7 @@ def carve(
 
 
 def largest_component(grid: VoxelGrid) -> VoxelGrid:
-
+    """Keep only the largest 6-connected blob (drops floating noise voxels)."""
     if not grid.occupancy.any():
         return grid
     labels = label(grid.occupancy, connectivity=1)
@@ -137,7 +137,7 @@ def carve_adaptive(
     fine_resolution: int = 128,
     pad_fraction: float = 0.08,
 ) -> VoxelGrid:
-
+    """Two-pass carve: locate the object coarsely, then re-carve tightly around it."""
     coarse = largest_component(carve(masks, cameras, initial_bounds, coarse_resolution))
     if not coarse.occupancy.any():
         raise ReconstructionError("No voxels survived carving. Check silhouettes and camera poses.")

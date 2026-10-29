@@ -12,9 +12,9 @@ def test_target_projects_to_image_centre_from_any_yaw():
 
 
 def test_image_axes_follow_opencv_convention():
-    cam = orbit_camera(0, 0, 1.0, (0, 0, 0), 640, 480, 65)
+    cam = orbit_camera(0, 0, 1.0, (0, 0, 0), 640, 480, 65)  # on +X looking toward -X
     uv_up, _ = cam.project(np.array([[0, 0, 0.1]]))
-    uv_right, _ = cam.project(np.array([[0, 0.1, 0]]))
+    uv_right, _ = cam.project(np.array([[0, 0.1, 0]]))  # facing -X with Z up, +Y is on the right
     assert uv_up[0, 1] < 240
     assert uv_right[0, 0] > 320
     assert np.allclose(cam.center, [1, 0, 0])

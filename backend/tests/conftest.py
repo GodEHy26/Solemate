@@ -1,4 +1,4 @@
-
+"""Test configuration: isolated data dir, inline processing, small voxel grids."""
 import os
 import tempfile
 

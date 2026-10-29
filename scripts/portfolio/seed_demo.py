@@ -1,12 +1,12 @@
+"""Create demo foot scans on a running SoleMate API, for portfolio screenshots.
 
+Uses the same synthetic test foot as the test suite (an ellipsoid, not a real foot), sent through
+the real API as photos so every stage runs: segmentation, visual hull, mesh, measurements, checks.
 
+    backend/.venv/bin/python scripts/portfolio/seed_demo.py            # API on http://localhost:8000
 
-
-
-
-
-
-
+Writes portfolio-shots/profiles.json for capture.mjs.
+"""
 from __future__ import annotations
 
 import argparse
@@ -80,8 +80,8 @@ def main() -> None:
     print("Building demo scans (each takes a few seconds)...")
     profiles = {
         "clean": {"left": api.scan("left", full_ring(), "paper"), "right": api.scan("right", full_ring(), "paper")},
-        "warning": api.scan("right", ring_with_gap(150, 240), "paper"),
-        "blocked": api.scan("right", full_ring(), "no-paper"),
+        "warning": api.scan("right", ring_with_gap(150, 240), "paper"),   # heel side missed
+        "blocked": api.scan("right", full_ring(), "no-paper"),             # no sheet of paper
     }
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

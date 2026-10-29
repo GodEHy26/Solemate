@@ -1,3 +1,5 @@
+// Thin typed client for the SoleMate API. All paths are relative so the Vite
+// dev proxy (or a production reverse proxy) decides where the backend lives.
 import type {
   CapturePlan,
   FitCheck,
@@ -11,8 +13,10 @@ import type {
   SiteConfig,
 } from './types';
 
+/** Set VITE_API_BASE (e.g. https://api.example.com) when the API lives on a different origin. */
 export const API_BASE: string = ((import.meta.env.VITE_API_BASE as string | undefined) ?? '').replace(/\/$/, '');
 
+/** Turn an API-relative path such as /api/profiles/x/mesh.glb into a full URL. */
 export const apiUrl = (path: string) => (path.startsWith('http') ? path : `${API_BASE}${path}`);
 
 export class ApiError extends Error {
@@ -28,7 +32,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const body = await res.json();
       detail = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail ?? body);
-    } catch { /* response body was not JSON */ }
+    } catch {
+      /* non-JSON error body */
+    }
     throw new ApiError(res.status, detail);
   }
   if (res.status === 204) return undefined as T;
@@ -45,6 +51,7 @@ export const api = {
   health: () => request<{ status: string }>('/api/health'),
   config: () => request<SiteConfig>('/api/config'),
 
+  // Scans ----------------------------------------------------------------
   capturePlan: () => request<CapturePlan>('/api/scans/plan'),
   createScan: (side: Side, opts: { known_length_mm?: number; paper_size?: string } = {}) =>
     request<ScanSession>('/api/scans', json({ side, ...opts })),
@@ -65,17 +72,20 @@ export const api = {
   },
   reconstruct: (id: string) => request<ScanSession>(`/api/scans/${id}/reconstruct`, { method: 'POST' }),
 
+  // Profiles -------------------------------------------------------------
   getProfile: (id: string) => request<FootProfile>(`/api/profiles/${id}`),
   fitCheck: (left: string, right: string) =>
     request<FitCheck>(`/api/profiles/fit-check?left=${encodeURIComponent(left)}&right=${encodeURIComponent(right)}`),
   getLastSpec: (id: string, shoe?: string) =>
     request<Record<string, unknown>>(`/api/profiles/${id}/last-spec${shoe ? `?shoe=${encodeURIComponent(shoe)}` : ''}`),
 
+  // Catalog --------------------------------------------------------------
   listShoes: () => request<{ shoes: ShoeSummary[] }>('/api/catalog/shoes').then((r) => r.shoes),
   getShoe: (slug: string) => request<ShoeDetail>(`/api/catalog/shoes/${slug}`),
   price: (shoe_slug: string, selections: Record<string, string>) =>
     request<PriceResult>('/api/catalog/price', json({ shoe_slug, selections })),
 
+  // Orders ---------------------------------------------------------------
   createOrder: (body: unknown) => request<OrderOut>('/api/orders', json(body)),
   getOrder: (id: string) => request<OrderOut>(`/api/orders/${id}`),
   startCheckout: (id: string) => request<{ url: string; session_id: string }>(`/api/orders/${id}/checkout`, { method: 'POST' }),
@@ -83,6 +93,7 @@ export const api = {
   deleteProfile: (id: string) => request<void>(`/api/profiles/${id}`, { method: 'DELETE' }),
 };
 
+/** Poll a scan until it leaves the processing state. */
 export async function waitForScan(id: string, onTick?: (s: ScanSession) => void, intervalMs = 1500): Promise<ScanSession> {
   for (;;) {
     const s = await api.getScan(id);

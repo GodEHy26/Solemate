@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type CameraStatus = 'idle' | 'starting' | 'ready' | 'denied' | 'unavailable';
 
+/** Rear-camera stream bound to a <video>, plus a JPEG snapshot helper. */
 export function useCamera(active: boolean) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);

@@ -3,6 +3,7 @@ import type { ScanWarning } from '../../lib/types';
 
 const SIDE: Record<string, string> = { left: 'Left foot', right: 'Right foot', both: 'Both feet' };
 
+/** Scan problems in plain language: what went wrong and what to do about it. */
 export function WarningList({ warnings, retake = true }: { warnings: ScanWarning[]; retake?: boolean }) {
   if (!warnings.length) return null;
   const blocking = warnings.some((w) => w.severity === 'block');

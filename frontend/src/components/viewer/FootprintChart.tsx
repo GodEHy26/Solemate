@@ -1,5 +1,6 @@
 import type { FootProfile } from '../../lib/types';
 
+/** 2D footprint outline with the ball / waist / heel stations marked. */
 export function FootprintChart({ profile }: { profile: FootProfile }) {
   const pts = profile.footprint_mm;
   if (!pts.length) return <p className="small muted">No footprint available.</p>;
@@ -34,6 +35,7 @@ export function FootprintChart({ profile }: { profile: FootProfile }) {
   );
 }
 
+/** A single cross-section outline (y, z) in mm. */
 export function SectionChart({ points, label }: { points: [number, number][]; label: string }) {
   if (!points.length) return null;
   const xs = points.map((p) => p[0]);
@@ -43,6 +45,7 @@ export function SectionChart({ points, label }: { points: [number, number][]; la
   const maxX = Math.max(...xs) + pad;
   const minY = Math.min(...ys) - pad;
   const maxY = Math.max(...ys) + pad;
+  // flip z so up is up
   return (
     <svg viewBox={`${minX} ${-maxY} ${maxX - minX} ${maxY - minY}`} style={{ width: '100%', maxHeight: 120 }} role="img" aria-label={`${label} cross-section`}>
       <polygon points={points.map((p) => `${p[0]},${-p[1]}`).join(' ')} fill="rgba(60,207,142,0.12)" stroke="var(--success)" strokeWidth={1} />

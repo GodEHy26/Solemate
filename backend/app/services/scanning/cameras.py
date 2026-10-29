@@ -1,8 +1,8 @@
+"""Pinhole camera model and the orbit rig used for reconstruction.
 
-
-
-
-
+Coordinates follow OpenCV conventions: camera x right, y down, z forward.
+World: Z up, floor at z = 0.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,14 +13,14 @@ import numpy as np
 
 @dataclass(frozen=True)
 class Camera:
-    K: np.ndarray
-    R: np.ndarray
-    t: np.ndarray
+    K: np.ndarray   # 3x3 intrinsics
+    R: np.ndarray   # 3x3 world -> camera rotation
+    t: np.ndarray   # (3,) translation, x_cam = R @ x_world + t
     width: int
     height: int
 
     def project(self, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-
+        """Project (N,3) world points -> ((N,2) pixel coords, (N,) depth)."""
         pts = np.asarray(points, dtype=np.float64)
         cam = pts @ self.R.T + self.t
         z = cam[:, 2]
@@ -31,7 +31,7 @@ class Camera:
 
     @property
     def center(self) -> np.ndarray:
-
+        """Camera position in world coordinates."""
         return -self.R.T @ self.t
 
 
@@ -47,7 +47,7 @@ def look_at(eye, target, up=(0.0, 0.0, 1.0)) -> tuple[np.ndarray, np.ndarray]:
     forward = target - eye
     forward /= np.linalg.norm(forward)
     right = np.cross(forward, up)
-    if np.linalg.norm(right) < 1e-9:
+    if np.linalg.norm(right) < 1e-9:  # looking straight down/up
         right = np.cross(forward, np.array([0.0, 1.0, 0.0]))
     right /= np.linalg.norm(right)
     down = np.cross(forward, right)
@@ -65,11 +65,11 @@ def orbit_camera(
     height: int,
     hfov_deg: float,
 ) -> Camera:
+    """Camera on a sphere of ``radius`` around ``target`` looking at it.
 
-
-
-
-
+    ``yaw`` is measured around +Z from the +X axis (toe direction) and
+    ``pitch`` is the elevation above the floor plane.
+    """
     pitch_deg = max(-89.5, min(89.5, pitch_deg))
     yaw, pitch = radians(yaw_deg), radians(pitch_deg)
     target = np.asarray(target, dtype=np.float64)

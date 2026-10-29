@@ -1,4 +1,4 @@
-
+"""Data retention: what the privacy policy promises, enforced in code."""
 from __future__ import annotations
 
 import logging
@@ -23,7 +23,7 @@ def _cutoff(hours: int) -> datetime:
 
 
 def purge_stale(db: Session) -> dict[str, int]:
-
+    """Delete abandoned scans (and their photos) and unpaid orders past their retention window."""
     s = get_settings()
     removed = {"sessions": 0, "orders": 0}
 

@@ -1,9 +1,9 @@
+"""Shoe-size estimates from foot length and ball width.
 
-
-
-
-
-
+These are conventional chart conversions (Brannock-style for US, Paris points
+for EU, Mondopoint for cm). A custom last does not strictly need a size, but
+customers expect one as a sanity check and it seeds the reference last grade.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,7 +25,7 @@ class WidthCategory:
         return {"code": self.code, "label": self.label, "ratio": round(self.ratio, 3)}
 
 
-
+# (upper bound of ball-width / length ratio, code, label) - roughly US men's letters
 _WIDTH_BANDS = [
     (0.345, "B", "Narrow"),
     (0.380, "D", "Medium"),
@@ -45,7 +45,7 @@ def width_category(length_mm: float, ball_width_mm: float) -> WidthCategory:
 
 
 def sizes_from_length(length_mm: float) -> dict[str, float]:
-
+    """Conventional size conversions for a bare foot length (no toe allowance applied)."""
     if length_mm <= 0:
         raise ValueError("length must be positive")
     inches = length_mm / MM_PER_INCH
@@ -60,7 +60,7 @@ def sizes_from_length(length_mm: float) -> dict[str, float]:
 
 
 def recommend_sizing(length_mm: float, ball_width_mm: float, toe_allowance_mm: float = 10.0) -> dict:
-
+    """Full sizing block: sizes for the foot and for the recommended shoe (with toe room)."""
     foot = sizes_from_length(length_mm)
     shoe = sizes_from_length(length_mm + toe_allowance_mm)
     width = width_category(length_mm, ball_width_mm)

@@ -1,4 +1,4 @@
-
+"""Public site configuration: preorder wording and the operator details shown on legal pages."""
 from __future__ import annotations
 
 from fastapi import APIRouter

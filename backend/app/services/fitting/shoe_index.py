@@ -1,9 +1,9 @@
+"""KD-tree over 5-D last measurement vectors.
 
-
-
-
-
-
+Carried over from the IB IA (``models/shoe_index.py``) where it indexed stock
+basketball shoes. Here it indexes *reference lasts* so a scanned foot can be
+matched to the closest base last before grading and custom adjustments.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -26,7 +26,7 @@ class _KDNode:
 
 
 class ShoeIndex:
-
+    """KD-tree supporting k-nearest-neighbour queries in measurement space."""
 
     def __init__(self, measurements: Sequence[Tuple[MeasurementVector, dict]]):
         points = [item for item in measurements if self._valid_vector(item[0])]

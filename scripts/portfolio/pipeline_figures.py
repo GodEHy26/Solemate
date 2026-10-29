@@ -1,12 +1,12 @@
+"""Draw each stage of the scan pipeline as portfolio figures, by running the real code.
 
+    backend/.venv/bin/pip install matplotlib
+    backend/.venv/bin/python scripts/portfolio/pipeline_figures.py
+    backend/.venv/bin/python scripts/portfolio/pipeline_figures.py --mesh my_foot.glb   # use your own scan
 
-
-
-
-
-
-
-
+Without --mesh it uses the synthetic test foot (an ellipsoid), and every figure says so.
+Writes portfolio-shots/fig-*.png.
+"""
 from __future__ import annotations
 
 import argparse
@@ -52,7 +52,7 @@ def rgb(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
-
+# --------------------------------------------------------------------------- 1. silhouettes
 def fig_silhouettes(frames, out, synthetic_note):
     picks = frames[:: max(1, len(frames) // 6)][:6]
     fig, axes = plt.subplots(2, 3, figsize=(10, 5.4))
@@ -69,7 +69,7 @@ def fig_silhouettes(frames, out, synthetic_note):
     save(fig, out, "fig-1-silhouettes.png")
 
 
-
+# --------------------------------------------------------------------------- 2. paper scale
 def fig_paper(top_img, out, synthetic_note):
     corners = detect_paper(top_img, "A4")
     td = measure_topdown(top_img, "A4")
@@ -90,7 +90,7 @@ def fig_paper(top_img, out, synthetic_note):
     save(fig, out, "fig-2-paper-scale.png")
 
 
-
+# --------------------------------------------------------------------------- 3. visual hull
 def fig_hull(frames, out, synthetic_note):
     masks, cams = [], []
     for f in frames:
@@ -117,7 +117,7 @@ def fig_hull(frames, out, synthetic_note):
     save(fig, out, "fig-3-visual-hull.png")
 
 
-
+# --------------------------------------------------------------------------- 4. mesh
 def fig_mesh(mesh, out, note):
     v, f = mesh.vertices, mesh.faces
     fig = plt.figure(figsize=(12, 3.6))
@@ -127,7 +127,7 @@ def fig_mesh(mesh, out, note):
         normals = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
         normals /= np.linalg.norm(normals, axis=1, keepdims=True) + 1e-9
         light = np.array([0.3, -0.4, 0.85]) / np.linalg.norm([0.3, -0.4, 0.85])
-        shade = 0.40 + 0.60 * np.abs(normals @ light)
+        shade = 0.40 + 0.60 * np.abs(normals @ light)   # two-sided, so winding doesn't matter
         colors = np.c_[0.86 * shade, 0.70 * shade, 0.55 * shade, np.ones_like(shade)]
         ax.add_collection3d(Poly3DCollection(tris, facecolors=colors, edgecolor="none", antialiased=False))
         lo, hi = v.min(axis=0), v.max(axis=0)
@@ -141,7 +141,7 @@ def fig_mesh(mesh, out, note):
     save(fig, out, "fig-4-mesh.png")
 
 
-
+# --------------------------------------------------------------------------- 5. measurements
 def fig_measurements(geo, out, note):
     m = geo.measurements
     fig = plt.figure(figsize=(11, 6.4))
@@ -177,7 +177,7 @@ def fig_measurements(geo, out, note):
     save(fig, out, "fig-5-measurements.png")
 
 
-
+# --------------------------------------------------------------------------- 6. quality checks
 def fig_quality(out):
     cases = [
         ("Clean scan", full_ring(), "plain", "paper"),

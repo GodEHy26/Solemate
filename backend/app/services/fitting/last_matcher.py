@@ -1,12 +1,12 @@
+"""Turn foot measurements into a custom last specification.
 
-
-
-
-
-
-
-
-
+1. Pick the closest *reference last* (optionally restricted to the last family
+   a shoe model is built on) with the KD-tree.
+2. Grade it to the customer's length (standard 1/3 inch per full US size).
+3. Record the per-dimension deltas between the graded last and the scanned
+   foot plus fit allowances. The result is what a last maker / 3D-printing
+   step needs to produce the customer's last.
+"""
 from __future__ import annotations
 
 import json
@@ -19,14 +19,14 @@ from .shoe_index import ShoeIndex
 
 DATA_FILE = Path(__file__).resolve().parents[2] / "data" / "reference_lasts.json"
 
-LENGTH_GRADE_MM_PER_SIZE = 25.4 / 3.0
+LENGTH_GRADE_MM_PER_SIZE = 25.4 / 3.0   # 8.47 mm
 WIDTH_GRADE_MM_PER_SIZE = 2.0
 HEIGHT_GRADE_MM_PER_SIZE = 1.0
 POSITION_GRADE_MM_PER_SIZE = 4.5
 
 DEFAULT_ALLOWANCES_MM = {
-    "length": 10.0,
-    "ball_width": 2.0,
+    "length": 10.0,       # toe room
+    "ball_width": 2.0,    # upper stretch / sock
     "toe_width": 3.0,
     "toe_height": 3.0,
     "waist_position": 0.0,
@@ -55,7 +55,7 @@ def build_index(family: str | None = None) -> ShoeIndex:
 
 
 def grade_last(last: dict, target_size: float) -> dict:
-
+    """Scale a reference last from its base size to ``target_size`` (US men's)."""
     steps = target_size - float(last["base_size_us"])
     return {
         "length_mm": last["length_mm"] + steps * LENGTH_GRADE_MM_PER_SIZE,
@@ -71,7 +71,7 @@ def build_last_spec(
     family: str | None = None,
     allowances: dict[str, float] | None = None,
 ) -> dict:
-
+    """Return the custom last specification for one foot."""
     allow = {**DEFAULT_ALLOWANCES_MM, **(allowances or {})}
     index = build_index(family)
     if index.is_empty():
@@ -80,7 +80,7 @@ def build_last_spec(
         raise RuntimeError("no reference lasts available")
 
     target_length = foot.length_mm + allow["length"]
-
+    # Query on a length-normalised foot so proportions, not size, drive the match.
     scale = 1.0
     matches = index.nearest_neighbors(foot.last_vector(), k=3)
     base = matches[0][1]

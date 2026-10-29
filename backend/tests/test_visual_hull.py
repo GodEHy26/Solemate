@@ -22,7 +22,7 @@ def test_hull_recovers_ellipsoid_extents():
     b = grid.bounds()
     extents = b[:, 1] - b[:, 0]
     expected = 2 * np.array(RADII)
-
+    # The visual hull contains the object and the voxel size adds a little padding.
     assert np.all(extents >= expected * 0.95)
     assert np.all(extents <= expected * 1.20)
     assert b[2, 0] == pytest.approx(0.0, abs=grid.spacing[2])

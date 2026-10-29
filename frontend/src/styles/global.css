@@ -1,3 +1,4 @@
+/* SoleMate — global styles. Dark theme carried over from the IA web app. */
 :root {
   --bg: #0f1117;
   --surface: #1a1d27;
@@ -40,7 +41,7 @@ h3 { font-size: 1.1rem; }
 p { color: var(--text-2); }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; background: var(--card-2); padding: 1px 5px; border-radius: 5px; }
 
-
+/* Layout */
 .shell { display: flex; flex-direction: column; min-height: 100vh; }
 .topbar {
   position: sticky; top: 0; z-index: 20;
@@ -71,7 +72,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .mt { margin-top: 14px; }
 .mb { margin-bottom: 14px; }
 
-
+/* Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   border: 1px solid transparent; border-radius: 12px; padding: 12px 18px;
@@ -88,14 +89,14 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 .btn.block { width: 100%; }
 .btn.lg { padding: 16px 24px; font-size: 1.05rem; }
 
-
+/* Pills & badges */
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; background: var(--card-2); color: var(--text-2); }
 .pill.success { background: rgba(60, 207, 142, 0.15); color: var(--success); }
 .pill.warning { background: rgba(255, 181, 71, 0.15); color: var(--warning); }
 .pill.error { background: rgba(255, 92, 92, 0.15); color: var(--error); }
 .pill.accent { background: rgba(40, 171, 255, 0.15); color: var(--accent); }
 
-
+/* Forms */
 label.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; color: var(--text-2); }
 input[type="text"], input[type="email"], input[type="number"], select, textarea {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-s);
@@ -106,13 +107,13 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-mute
 .segmented button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; color: var(--text-2); cursor: pointer; font-weight: 600; }
 .segmented button.on { background: var(--card-2); color: var(--text); }
 
-
+/* Alerts */
 .alert { border-radius: var(--radius-s); padding: 12px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 0.92rem; }
 .alert.error { border-color: rgba(255, 92, 92, 0.5); color: #ffb3b3; }
 .alert.warning { border-color: rgba(255, 181, 71, 0.5); color: #ffd79a; }
 .alert.success { border-color: rgba(60, 207, 142, 0.5); color: #a8f0cf; }
 
-
+/* Hero */
 .hero { padding: 48px 0 24px; display: grid; gap: 28px; }
 @media (min-width: 900px) { .hero { grid-template-columns: 1.2fr 1fr; align-items: center; } }
 .hero h1 { margin-bottom: 12px; }
@@ -121,7 +122,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-mute
 .step { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; }
 .step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--card-2); color: var(--accent); font-weight: 700; }
 
-
+/* Scan */
 .scan-stage { position: relative; width: min(92vw, 420px); aspect-ratio: 1; margin: 0 auto; }
 .scan-stage video { position: absolute; inset: 8%; width: 84%; height: 84%; object-fit: cover; border-radius: 50%; background: #000; }
 .scan-stage video.square { border-radius: 18px; inset: 4%; width: 92%; height: 92%; }
@@ -134,7 +135,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-mute
 .thumbs { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0; }
 .thumbs img { width: 56px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
 
-
+/* Viewer */
 .viewer { height: 380px; border-radius: var(--radius); overflow: hidden; background: radial-gradient(ellipse at top, #1d2230 0%, #0f1117 70%); border: 1px solid var(--border); }
 .viewer canvas { outline: none; }
 table.measure { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
@@ -145,7 +146,7 @@ table.measure td:last-child { text-align: right; font-variant-numeric: tabular-n
 .size-tile .v { font-size: 1.3rem; font-weight: 700; }
 .size-tile .k { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
 
-
+/* Catalog / configurator */
 .shoe-card { display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
 .shoe-card .swatch { height: 120px; border-radius: var(--radius-s); background: linear-gradient(135deg, var(--c, #28abff), #0f1117); }
 .option-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
@@ -174,7 +175,7 @@ table.measure td:last-child { text-align: right; font-variant-numeric: tabular-n
 @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 .pulse { animation: pulse 1.2s ease-in-out infinite; }
 
-
+/* ===================== Mobile / PWA ===================== */
 html { -webkit-tap-highlight-color: transparent; }
 body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 .topbar { padding-top: calc(12px + env(safe-area-inset-top)); }
@@ -189,7 +190,7 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
   h1 { font-size: 1.6rem; }
   .hero { padding: 20px 0 8px; }
 
-
+  /* bottom tab bar */
   .tabbar {
     display: grid; grid-template-columns: repeat(4, 1fr);
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
@@ -206,7 +207,7 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
   .tabbar a.active { color: var(--accent); background: rgba(40, 171, 255, 0.1); }
   .tabbar .badge { position: absolute; top: 2px; right: calc(50% - 20px); background: var(--accent); color: #06111c; border-radius: 999px; font-size: 0.62rem; padding: 0 5px; min-width: 16px; text-align: center; }
 
-
+  /* comfortable touch targets; 16px inputs stop iOS Safari zooming on focus */
   .btn { min-height: 48px; }
   .segmented button { min-height: 40px; padding: 8px 18px; }
   input[type="text"], input[type="email"], input[type="number"], select, textarea { font-size: 16px; min-height: 46px; }
@@ -221,11 +222,11 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
   .btn.lg { padding: 16px 20px; }
   .row.between > .stack { align-items: flex-start !important; }
 
-
+  /* scan: camera fills the width */
   .scan-stage { width: min(100%, 440px); }
   .card { padding: 14px; }
 
-
+  /* configurator: keep the price + add-to-cart reachable above the tab bar */
   .price-bar {
     position: fixed; left: 0; right: 0; bottom: calc(62px + env(safe-area-inset-bottom)); z-index: 25;
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -235,7 +236,7 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
 @media (min-width: 721px) { .price-bar { display: none; } }
 @media (max-width: 380px) { .option-grid { grid-template-columns: 1fr; } }
 
-
+/* Preorder banner, legal pages, consent */
 .preorder-banner { display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap; padding: 8px 14px; background: rgba(255, 181, 71, 0.12); border-bottom: 1px solid rgba(255, 181, 71, 0.35); font-size: 0.85rem; color: #ffd79a; text-align: center; }
 .preorder-banner strong { letter-spacing: 0.08em; color: var(--warning); }
 .footer { display: flex; flex-direction: column; gap: 8px; align-items: center; }
@@ -245,6 +246,6 @@ body { overscroll-behavior-y: none; padding-left: env(safe-area-inset-left); pad
 .consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 0.9rem; color: var(--text-2); cursor: pointer; }
 .consent input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); }
 
-
+/* Scan warnings and size ranges */
 .scan-warning { display: grid; gap: 4px; }
 .size-grid.range .v { font-size: 1.05rem; }

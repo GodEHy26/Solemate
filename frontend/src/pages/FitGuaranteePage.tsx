@@ -1,3 +1,6 @@
+// Fit guarantee (refund policy for scan-based sizing). Production hasn't started, so this is the
+// policy orders will be made under once it does. The claim window and conditions are defaults:
+// confirm them before launch (see docs/PAYMENTS.md).
 import { Link } from 'react-router-dom';
 import { LegalLayout, useOperator } from './LegalLayout';
 

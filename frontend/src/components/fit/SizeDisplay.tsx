@@ -9,6 +9,7 @@ const LABELS: Array<[keyof NonNullable<SizeSummary['sizes']>, string]> = [
 
 const fmt = (r: { low: number; high: number }) => (r.low === r.high ? `${r.low}` : `${r.low} to ${r.high}`);
 
+/** One size, a range when the scan has warnings, or nothing when a check blocks it. */
 export function SizeDisplay({ size }: { size: SizeSummary }) {
   if (size.mode === 'none' || !size.sizes) {
     return (
