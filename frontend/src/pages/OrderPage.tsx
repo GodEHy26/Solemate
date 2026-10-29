@@ -32,7 +32,7 @@ export function OrderPage() {
         setOrder(o);
         if (o.status === 'preordered') {
           clearCart();
-          try { sessionStorage.removeItem('solemate-pending-order'); } catch
+          try { sessionStorage.removeItem('solemate-pending-order'); } catch { /* storage unavailable */ }
           setChecking(false);
         } else if (returningFromStripe && tries.current++ < 10) {
           timer = window.setTimeout(tick, 2000);

@@ -28,7 +28,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const body = await res.json();
       detail = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail ?? body);
-    } catch
+    } catch { /* response body was not JSON */ }
     throw new ApiError(res.status, detail);
   }
   if (res.status === 204) return undefined as T;

@@ -33,7 +33,7 @@ export function InstallPrompt() {
     setDismissed(true);
     try {
       localStorage.setItem('solemate-install-dismissed', '1');
-    } catch
+    } catch { /* storage unavailable */ }
   };
 
   if (dismissed || isStandalone()) return null;
